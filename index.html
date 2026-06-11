@@ -138,7 +138,10 @@ select option{background:var(--surface-2);color:var(--text);}
         <div class="hdr-sub">PBG Predators Soccer</div>
       </div>
     </div>
-    <div id="mode-chip" class="mode-chip chip-vw">Viewer</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div id="mode-chip" class="mode-chip chip-vw">Viewer</div>
+      <button onclick="signOut()" style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;background:none;border:1px solid var(--border-light);color:var(--text-muted);cursor:pointer;">Sign Out</button>
+    </div>
   </div>
   <div class="tabs">
     <button class="tab-btn active" data-tab="dashboard" onclick="goTab('dashboard')">Dashboard</button>
@@ -184,10 +187,10 @@ function toDbItem(i) {
   return { description: i.desc, owner: i.owner, due_date: i.dueDate || null, category: i.category, priority: i.priority, status: i.status, source_meeting_id: i.sourceMeeting || null, notes: i.notes || null };
 }
 function fromDbMtg(r) {
-  return { id: r.id, date: r.date, type: r.type, summary: r.summary || '', driveLink: r.drive_link || '' };
+  return { id: r.id, date: r.date, type: r.type, summary: r.summary || '', driveLink: r.drive_link || '', agendaLink: r.agenda_link || '' };
 }
 function toDbMtg(m) {
-  return { date: m.date, type: m.type, summary: m.summary || null, drive_link: m.driveLink || null };
+  return { date: m.date, type: m.type, summary: m.summary || null, drive_link: m.driveLink || null, agenda_link: m.agendaLink || null };
 }
 
 
@@ -232,6 +235,18 @@ function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 // ============================================================
 // PIN
 // ============================================================
+function signOut() {
+  ST.mode = null; ST.pin = null; ST.items = []; ST.meetings = [];
+  ST.tab = 'dashboard'; ST.fStatus = 'all'; ST.fCat = 'all';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pin-screen').style.display = 'flex';
+  document.getElementById('pin-field').value = '';
+  document.getElementById('pin-msg').textContent = '';
+  document.getElementById('mode-chip').className = 'mode-chip chip-vw';
+  document.getElementById('mode-chip').textContent = 'Viewer';
+  document.getElementById('fab').classList.add('hidden');
+}
+
 document.getElementById('pin-field').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') doPin();
 });
@@ -334,7 +349,10 @@ function rDash() {
       + '<div class="mtg-date">'+fmtDate(lm.date)+'</div>'
       + '<div class="mtg-type">'+esc(lm.type)+'</div>'
       + '<div class="mtg-sum">'+esc(lm.summary||'')+'</div>'
-      + (lm.driveLink ? '<a href="'+lm.driveLink+'" target="_blank" style="font-size:12px">&#128196; View Minutes in Drive</a>' : '')
+      + '<div style="display:flex;gap:14px;flex-wrap:wrap;">'
+      + (lm.driveLink ? '<a href="'+lm.driveLink+'" target="_blank" style="font-size:12px">&#128196; Meeting Minutes</a>' : '')
+      + (lm.agendaLink ? '<a href="'+lm.agendaLink+'" target="_blank" style="font-size:12px">&#128203; Meeting Agenda</a>' : '')
+      + '</div>'
       + '</div>';
   }
   return h;
@@ -391,7 +409,10 @@ function rMeetings() {
       + '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">'+mi.length+' action item'+(mi.length!==1?'s':'')
       + (nO>0?' &middot; <span style="color:#3D9BE9">'+nO+' open</span>':'')
       + (nV>0?' &middot; <span style="color:#E84040">'+nV+' overdue</span>':'')+'</div>'
-      + (m.driveLink ? '<a href="'+m.driveLink+'" target="_blank" style="font-size:12px">&#128196; View Minutes in Drive</a>' : '');
+      + '<div style="display:flex;gap:14px;flex-wrap:wrap;">'
+      + (m.driveLink ? '<a href="'+m.driveLink+'" target="_blank" style="font-size:12px">&#128196; Meeting Minutes</a>' : '')
+      + (m.agendaLink ? '<a href="'+m.agendaLink+'" target="_blank" style="font-size:12px">&#128203; Meeting Agenda</a>' : '')
+      + '</div>';
     if (mi.length) {
       h += '<div class="mtg-items">';
       mi.forEach(function(i){ h += '<div class="mtg-item-row"><span style="flex:1">'+esc(i.desc)+'</span><span class="badge" style="'+stSty(effSt(i))+';white-space:nowrap">'+effSt(i)+'</span></div>'; });
@@ -526,16 +547,26 @@ function showMtgModal(m) {
     + '<div class="fg"><label class="fl">Type</label><select class="fs" id="mf-type">'+types.map(function(t){ return '<option value="'+t+'"'+(m&&m.type===t?' selected':'')+'>'+t+'</option>'; }).join('')+'</select></div>'
     + '</div>'
     + '<div class="fg"><label class="fl">Summary</label><textarea class="fa" id="mf-sum" placeholder="Brief summary of key topics...">'+(m?esc(m.summary||''):'')+'</textarea></div>'
-    + '<div class="fg"><label class="fl">Google Drive Link (minutes)</label><input class="fi" id="mf-drive" placeholder="https://drive.google.com/..." value="'+(m&&m.driveLink||'')+'"></div>'
+    + '<div class="fg"><label class="fl">Link to Meeting Minutes</label><input class="fi" id="mf-drive" placeholder="https://drive.google.com/..." value="'+(m&&m.driveLink||'')+'"></div>'
+    + '<div class="fg"><label class="fl">Link to Meeting Agenda</label><input class="fi" id="mf-agenda" placeholder="https://drive.google.com/..." value="'+(m&&m.agendaLink||'')+'"></div>'
     + '<div class="modal-foot"><button class="btn-can" onclick="closeModal()">Cancel</button><button class="btn-pri" onclick="saveMtg(\''+(m&&m.id||'')+'\')">Save Meeting</button></div>';
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('overlay').classList.remove('hidden');
 }
 
+function isValidLink(url) {
+  if (!url) return true;
+  return url.startsWith('https://');
+}
+
 async function saveMtg(eid) {
   var date = document.getElementById('mf-date').value;
   if (!date) { alert('Date is required.'); return; }
-  var d = { date: date, type: document.getElementById('mf-type').value, summary: document.getElementById('mf-sum').value.trim(), driveLink: document.getElementById('mf-drive').value.trim() };
+  var drive = document.getElementById('mf-drive').value.trim();
+  var agenda = document.getElementById('mf-agenda').value.trim();
+  if (!isValidLink(drive)) { alert('Meeting minutes link must start with https://'); return; }
+  if (!isValidLink(agenda)) { alert('Meeting agenda link must start with https://'); return; }
+  var d = { date: date, type: document.getElementById('mf-type').value, summary: document.getElementById('mf-sum').value.trim(), driveLink: drive, agendaLink: agenda };
   try {
     if (eid) { await api('PUT', 'meetings/'+eid, toDbMtg(d)); }
     else { await api('POST', 'meetings', toDbMtg(d)); }
