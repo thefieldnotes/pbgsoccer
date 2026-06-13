@@ -235,7 +235,7 @@ document.getElementById('pin-field').addEventListener('keydown', function(e) { i
 
 function doPin() {
   var v = document.getElementById('pin-field').value.trim();
-  if (v === '2847') { ST.pin = v; boot(); }
+  if (v === '2847') { sessionStorage.setItem('pbg_session_pin', v); ST.pin = v; boot(); }
   else {
     var f = document.getElementById('pin-field');
     document.getElementById('pin-msg').textContent = 'Editor PIN required for this interface.';
@@ -245,6 +245,7 @@ function doPin() {
 }
 
 function signOut() {
+  sessionStorage.removeItem('pbg_session_pin');
   ST.pin = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('pin-screen').style.display = 'flex';
@@ -789,6 +790,17 @@ async function runImport() {
 }
 
 function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── SESSION RESTORE ───────────────────────────────────────────
+(function() {
+  const saved = sessionStorage.getItem('pbg_session_pin');
+  if (saved === '2847') {
+    ST.pin = saved;
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    boot();
+  }
+})();
 </script>
 </body>
 </html>

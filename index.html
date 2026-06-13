@@ -236,6 +236,7 @@ function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 // PIN
 // ============================================================
 function signOut() {
+  sessionStorage.removeItem('pbg_session_pin');
   ST.mode = null; ST.pin = null; ST.items = []; ST.meetings = [];
   ST.tab = 'dashboard'; ST.fStatus = 'all'; ST.fCat = 'all';
   document.getElementById('app').style.display = 'none';
@@ -253,8 +254,8 @@ document.getElementById('pin-field').addEventListener('keydown', function(e) {
 
 function doPin() {
   var v = document.getElementById('pin-field').value.trim();
-  if (v === CFG.EDITOR_PIN) { ST.mode = 'editor'; ST.pin = v; boot(); }
-  else if (v === CFG.VIEWER_PIN) { ST.mode = 'viewer'; ST.pin = v; boot(); }
+  if (v === CFG.EDITOR_PIN) { sessionStorage.setItem('pbg_session_pin', v); ST.mode = 'editor'; ST.pin = v; boot(); }
+  else if (v === CFG.VIEWER_PIN) { sessionStorage.setItem('pbg_session_pin', v); ST.mode = 'viewer'; ST.pin = v; boot(); }
   else {
     var f = document.getElementById('pin-field');
     document.getElementById('pin-msg').textContent = 'Incorrect PIN \u2014 try again.';
@@ -605,6 +606,16 @@ function doExport() {
   document.getElementById('pin-logo-img').src = src;
   document.getElementById('hdr-logo-img').src = src;
 })();
+
+// ── SESSION RESTORE ───────────────────────────────────────────
+(function() {
+  const saved = sessionStorage.getItem('pbg_session_pin');
+  if (saved === '2847' || saved === '1963') {
+    if (saved === '2847') { ST.mode = 'editor'; ST.pin = saved; boot(); }
+    else { ST.mode = 'viewer'; ST.pin = saved; boot(); }
+  }
+})();
+
 </script>
 </body>
 </html>

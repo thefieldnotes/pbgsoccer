@@ -267,6 +267,20 @@ let ST = {
   document.getElementById('hdr-logo').src = logo;
 })();
 
+// ── SESSION RESTORE ───────────────────────────────────────────
+(function() {
+  const saved = sessionStorage.getItem('pbg_session_pin');
+  if (saved === '2847' || saved === '1963') {
+    ST.pin = saved;
+    ST.isEditor = saved === '2847';
+    if (ST.isEditor) { const al = document.getElementById('admin-link'); if(al) al.style.display = ''; }
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    if (typeof loadData === 'function') loadData();
+    else if (typeof boot === 'function') boot();
+  }
+})();
+
 // ── AUTH ─────────────────────────────────────────────────────
 document.getElementById('pin-field').addEventListener('keydown', e => {
   if (e.key === 'Enter') doPin();
@@ -275,6 +289,7 @@ document.getElementById('pin-field').addEventListener('keydown', e => {
 function doPin() {
   const v = document.getElementById('pin-field').value.trim();
   if (v === '2847' || v === '1963') {
+    sessionStorage.setItem('pbg_session_pin', v);
     ST.pin = v;
     ST.isEditor = v === '2847';
     if (ST.isEditor) document.getElementById('admin-link').style.display = '';
@@ -290,6 +305,7 @@ function doPin() {
 }
 
 function signOut() {
+  sessionStorage.removeItem('pbg_session_pin');
   ST.pin = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('pin-screen').style.display = 'flex';
