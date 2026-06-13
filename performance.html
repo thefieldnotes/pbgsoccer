@@ -167,6 +167,7 @@ select option{background:var(--surface-2);color:var(--text);}
     <div class="hdr-nav">
       <a href="index.html" class="nav-link">Board Ops</a>
       <a href="performance.html" class="nav-link active">Performance</a>
+      <a href="team-detail.html" class="nav-link">Team Detail</a>
       <a href="admin.html" class="nav-link" id="admin-link" style="display:none">Admin</a>
       <button class="sign-out" onclick="signOut()">Sign Out</button>
     </div>
@@ -855,7 +856,7 @@ function renderAgeBreakdown(matches) {
       const tierBadge = team.program_tier ? `<span style="font-size:9px;background:var(--surface-3);color:var(--text-muted);padding:1px 6px;border-radius:3px;margin-left:4px;">${team.program_tier}</span>` : '';
       return `<div class="age-row">
         <div class="age-row-hdr">
-          <span class="age-name">${esc(team.canonical_name)}${tierBadge}</span>
+          <a href="team-detail.html?team=${team.id}" class="age-name" style="color:var(--text);text-decoration:none">${esc(team.canonical_name)}${tierBadge}</a>
           <span class="age-record">${stats.W}W ${stats.L}L ${stats.D}D &middot; ${pct}%</span>
         </div>
         <div class="age-bar-track"><div class="age-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
@@ -932,11 +933,12 @@ function renderHeatMap(matches) {
       lastSide = side;
     }
     const tierBadge = team.program_tier ? `<span style="font-size:9px;background:var(--surface-3);color:var(--text-muted);padding:1px 5px;border-radius:3px;margin-left:5px;">${team.program_tier}</span>` : '';
-    rows += `<tr><td class="team-name">${esc(team.canonical_name)}${tierBadge}</td>`;
+    rows += `<tr><td class="team-name"><a href="team-detail.html?team=${team.id}" style="color:var(--text);text-decoration:none;display:block">${esc(team.canonical_name)}${tierBadge}</a></td>`;
     seasonLabels.forEach(s => {
       const d = teamSeasonStats[tid]?.[s];
       const c = gdColor(d ? d.GD : 0, d ? d.GP : 0);
-      rows += `<td><div class="heat-cell" style="background:${c.bg};color:${c.text};cursor:pointer" title="${team.canonical_name} · ${s}: ${c.label}">${c.label}</div></td>`;
+      const hasData = c.label !== '—';
+        rows += `<td${hasData ? ` class="heat-td" data-tid="${team.id}"` : ''} style="cursor:${hasData?'pointer':'default'}" title="${team.canonical_name} · ${s}: ${c.label}"><div class="heat-cell" style="background:${c.bg};color:${c.text}">${c.label}</div></td>`;
     });
     rows += '</tr>';
   });
@@ -944,8 +946,8 @@ function renderHeatMap(matches) {
   el.innerHTML = `
   <div class="heat-section">
     <div class="sec-hdr">Program Heat Map &middot; GD per Game by Team &amp; Season</div>
-    <p style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">Goal differential per game &middot; Green = positive &middot; Red = negative &middot; Darker = more extreme</p>
-    <table class="heat-table">
+    <p style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">Goal differential per game &middot; Green = positive &middot; Red = negative &middot; Darker = more extreme &middot; Click team name or cell to view detail</p>
+    <table class="heat-table" id="heat-table">
       <thead>
         <tr>
           <th class="team-col">Team</th>
@@ -955,6 +957,14 @@ function renderHeatMap(matches) {
       <tbody>${rows}</tbody>
     </table>
   </div>`;
+
+  // Wire up cell clicks via event delegation (avoids template literal quoting issues)
+  document.getElementById('heat-table')?.addEventListener('click', function(e) {
+    const td = e.target.closest('.heat-td');
+    if (td && td.dataset.tid) {
+      window.location.href = 'team-detail.html?team=' + td.dataset.tid;
+    }
+  });
 }
 
 // ── HIGHLIGHTS & LOWLIGHTS ───────────────────────────────────
