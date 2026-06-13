@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>PBG Predators Board Dashboard</title>
@@ -116,6 +118,27 @@ select option{background:var(--surface-2);color:var(--text);}
 .empty-icon{font-size:42px;margin-bottom:12px;}
 .empty-txt{font-size:14px;}
 .hidden{display:none!important;}
+
+/* ── SHARED NAV ── */
+.nav{background:#06101E;border-bottom:1px solid #1a2f4a;padding:0 28px;display:flex;align-items:center;height:54px;position:sticky;top:0;z-index:200}
+.nav-logo{display:flex;align-items:center;gap:10px;margin-right:36px;flex-shrink:0}
+.nav-badge{width:34px;height:34px;border-radius:50%;border:1.5px solid #2E6BAD;background:#0D1F3C;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:#fff;text-transform:uppercase;line-height:1.3;white-space:nowrap}
+.nav-title span{color:#5B9BD5;display:block;font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+.nav-links{display:flex;align-items:stretch;flex:1;gap:0}
+.nav-link{padding:0 18px;display:flex;align-items:center;font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#4a7a9b;cursor:pointer;border-bottom:2px solid transparent;height:54px;text-decoration:none;white-space:nowrap;transition:color .15s,border-color .15s}
+.nav-link:hover{color:#fff}
+.nav-link.active{color:#fff;border-bottom-color:#2E6BAD}
+.nav-link.soon{color:#2a4a62;cursor:default;pointer-events:none}
+.nav-link.soon .soon-tag{font-size:7px;background:#0D2035;color:#2E6BAD;padding:1px 5px;border-radius:2px;margin-left:6px;letter-spacing:.04em;border:1px solid #1a3a5a;vertical-align:middle}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.nav-role-badge{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:2px}
+.nav-role-editor{background:#3D1F00;color:#FEB95A;border:1px solid #7C3D00}
+.nav-role-viewer{background:#0D1F3C;color:#5B9BD5;border:1px solid #2E6BAD}
+.nav-signout-btn{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#2a4a62;cursor:pointer;padding:5px 10px;border:1px solid #1a3050;border-radius:2px;background:transparent;transition:all .15s}
+.nav-signout-btn:hover{color:#fff;border-color:#2E6BAD}
+@media(max-width:900px){.nav{padding:0 16px}.nav-title span{display:none}.nav-link{padding:0 12px;font-size:10px}}
+@media(max-width:600px){.nav{padding:0 12px;height:48px}.nav-title{font-size:10px}.nav-links{display:none}.nav-mobile-menu{display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-left:8px}.nav-mobile-menu::-webkit-scrollbar{display:none}.nav-mobile-link{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#4a7a9b;white-space:nowrap;padding:4px 10px;border:1px solid #1a2f4a;border-radius:2px;text-decoration:none;flex-shrink:0}.nav-mobile-link.active{color:#fff;border-color:#2E6BAD;background:#0D1F3C}.nav-mobile-link.soon{color:#1e3a52;border-color:#0d1e32;pointer-events:none}.nav-role-badge{display:none}}
 </style>
 </head>
 <body>
@@ -130,19 +153,30 @@ select option{background:var(--surface-2);color:var(--text);}
 </div>
 
 <div id="app">
-  <div class="hdr">
-    <div class="hdr-left">
-      <img class="hdr-logo" id="hdr-logo-img" alt="PBG Predators">
-      <div>
-        <div class="hdr-title">Board Dashboard</div>
-        <div class="hdr-sub">PBG Predators Soccer</div>
-      </div>
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-badge"><svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="50" fill="#0D1F3C"/>
+          <circle cx="50" cy="50" r="47" fill="none" stroke="#2E6BAD" stroke-width="3"/>
+          <circle cx="50" cy="51" r="16" fill="white"/>
+          <polygon points="50,38 57,44 54.5,53 45.5,53 43,44" fill="#1a3a5c"/>
+          <path d="M44,36 C42,40 43,44 46,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M50,34 C50,38 50,42 50,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M56,36 C58,40 57,44 54,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        </svg></div>
+      <div class="nav-title">PBG Predators <span>Board Command Center</span></div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div id="mode-chip" class="mode-chip chip-vw">Viewer</div>
-      <button onclick="signOut()" style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;background:none;border:1px solid var(--border-light);color:var(--text-muted);cursor:pointer;">Sign Out</button>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Executive</a>
+      <a href="governance.html" class="nav-link active">Governance</a>
+      <a href="performance.html" class="nav-link">Performance</a>
+      <a class="nav-link soon" href="#">Financial <span class="soon-tag">SOON</span></a>
     </div>
-  </div>
+    <div class="nav-right">
+      <span class="nav-role-badge" id="nav-role-badge"></span>
+      <button class="nav-signout-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </nav>
   <div class="tabs">
     <button class="tab-btn active" data-tab="dashboard" onclick="goTab('dashboard')">Dashboard</button>
     <button class="tab-btn" data-tab="actions" onclick="goTab('actions')">Actions</button>
@@ -230,6 +264,37 @@ function mLbl(id) {
   return m ? fmtDate(m.date) + ' \u2014 ' + m.type : '';
 }
 function uid() { return 'i' + Date.now() + Math.random().toString(36).slice(2,6); }
+
+function buildMobileNav(activePage) {
+  var pages = [
+    { label:'Executive', href:'index.html' },
+    { label:'Governance', href:'governance.html' },
+    { label:'Performance', href:'performance.html' },
+    { label:'Financial', href:'#', soon:true }
+  ];
+  function apply() {
+    var navLinks = document.querySelector('.nav-links');
+    if (!navLinks) return;
+    var strip = document.querySelector('.nav-mobile-menu');
+    if (window.innerWidth <= 600) {
+      navLinks.style.display = 'none';
+      if (!strip) {
+        strip = document.createElement('div');
+        strip.className = 'nav-mobile-menu';
+        strip.innerHTML = pages.map(function(p) {
+          return '<a class="nav-mobile-link' + (p.href===activePage?' active':'') + (p.soon?' soon':'') + '" href="' + p.href + '">' + p.label + '</a>';
+        }).join('');
+        navLinks.parentNode.insertBefore(strip, navLinks);
+      }
+    } else {
+      navLinks.style.display = 'flex';
+      if (strip) strip.remove();
+    }
+  }
+  apply();
+  window.addEventListener('resize', apply);
+}
+
 function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ============================================================
@@ -271,6 +336,12 @@ function doPin() {
 async function boot() {
   document.getElementById('pin-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+  var nb = document.getElementById('nav-role-badge');
+  if (nb) {
+    nb.textContent = (ST.mode === 'editor') ? 'Editor' : 'Viewer';
+    nb.className = 'nav-role-badge ' + ((ST.mode === 'editor') ? 'nav-role-editor' : 'nav-role-viewer');
+  }
+  buildMobileNav('governance.html');
   var chip = document.getElementById('mode-chip');
   if (ST.mode === 'editor') {
     chip.className = 'mode-chip chip-ed';

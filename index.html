@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBG Predators — Executive Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-size:13px;min-height:100vh}
+
+/* ── PIN ── */
+#pin-screen{position:fixed;inset:0;background:#0A1728;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:32px 24px;}
+.pin-logo-wrap{width:80px;height:80px;border-radius:50%;border:2px solid #2E6BAD;background:#0D1F3C;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 0 32px rgba(46,107,173,0.4);}
+.pin-h{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;text-align:center;letter-spacing:.02em;}
+.pin-sub{font-size:12px;color:#5B9BD5;margin-bottom:28px;text-align:center;font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:9px;}
+.pin-field{width:100%;max-width:280px;background:#0D1F3C;border:2px solid #1a3a5a;border-radius:2px;color:#fff;font-size:24px;font-weight:700;letter-spacing:12px;padding:12px 16px;text-align:center;outline:none;-webkit-text-security:disc;margin-bottom:12px;font-family:'Montserrat',sans-serif;}
+.pin-field:focus{border-color:#2E6BAD;}
+.pin-field.shake{animation:shake .35s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+.pin-go{width:100%;max-width:280px;background:#2E6BAD;color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:2px;padding:12px;font-family:'Montserrat',sans-serif;}
+.pin-go:hover{background:#5B9BD5;}
+.pin-msg{min-height:20px;margin-top:10px;font-size:12px;color:#C0392B;text-align:center;}
+
+/* ── SHARED NAV ── */
+.nav{background:#06101E;border-bottom:1px solid #1a2f4a;padding:0 28px;display:flex;align-items:center;height:54px;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px;margin-right:36px;flex-shrink:0}
+.nav-badge{width:34px;height:34px;border-radius:50%;border:1.5px solid #2E6BAD;background:#0D1F3C;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:#fff;text-transform:uppercase;line-height:1.3;white-space:nowrap}
+.nav-title span{color:#5B9BD5;display:block;font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-top:1px}
+.nav-links{display:flex;align-items:stretch;flex:1;gap:0}
+.nav-link{padding:0 18px;display:flex;align-items:center;font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#4a7a9b;cursor:pointer;border-bottom:2px solid transparent;height:54px;text-decoration:none;white-space:nowrap;transition:color .15s,border-color .15s}
+.nav-link:hover{color:#fff}
+.nav-link.active{color:#fff;border-bottom-color:#2E6BAD}
+.nav-link.soon{color:#2a4a62;cursor:default;pointer-events:none}
+.nav-link.soon .soon-tag{font-size:7px;background:#0D2035;color:#2E6BAD;padding:1px 5px;border-radius:2px;margin-left:6px;letter-spacing:.04em;border:1px solid #1a3a5a;vertical-align:middle}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.role-badge{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:2px;}
+.role-editor{background:#3D1F00;color:#FEB95A;border:1px solid #7C3D00}
+.role-viewer{background:#0D1F3C;color:#5B9BD5;border:1px solid #2E6BAD}
+.nav-signout{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#2a4a62;cursor:pointer;padding:5px 10px;border:1px solid #1a3050;border-radius:2px;background:transparent;transition:all .15s}
+.nav-signout:hover{color:#fff;border-color:#2E6BAD}
+
+/* ── PAGE LAYOUT ── */
+.page{max-width:960px;margin:0 auto;padding:24px 28px 56px}
+
+/* ── LOADING ── */
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;color:#4a7a9b;}
+.spinner{width:28px;height:28px;border:3px solid #1a2f4a;border-top-color:#2E6BAD;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;}
+
+/* ── SECTION LABEL ── */
+.section-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#2a4a62;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:#1a2f4a}
+
+/* ── HERO ── */
+.hero{padding:20px 0;border-bottom:1px solid #1a2f4a;margin-bottom:24px}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.hero-eyebrow{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#2E6BAD;margin-bottom:4px}
+.hero-title{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:700;color:#fff;letter-spacing:.01em;line-height:1.1}
+.hero-title em{color:#2E6BAD;font-style:normal}
+.hero-meta{text-align:right;flex-shrink:0;margin-left:20px}
+.hero-meta-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2a4a62;margin-bottom:3px}
+.hero-meta-value{font-size:11.5px;color:#5B9BD5;font-weight:500}
+.hero-summary{background:#0D1F3C;border-left:3px solid #2E6BAD;padding:11px 16px;font-size:12.5px;color:#8ab0cc;line-height:1.65;border-radius:0 2px 2px 0}
+.hero-summary strong{color:#e0edf7}
+
+/* ── CLUB HEALTH ENGINE ── */
+.health-engine{background:#0D1F3C;border:1px solid #1a3a5a;padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;gap:20px}
+.health-domains{display:flex;gap:8px;flex:1}
+.domain{flex:1;text-align:center;padding:4px 8px}
+.domain-dial{width:76px;height:76px;margin:0 auto 9px}
+.domain-name{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#5B9BD5;margin-bottom:3px}
+.domain-name.muted{color:#1e3a52}
+.domain-score-val{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#5B9BD5}
+.domain-trend{font-size:10.5px;color:#4ADE80;font-weight:500}
+.domain-trend.muted{color:#1e3a52;font-style:italic;font-size:10px}
+.health-divider{width:1px;background:#1a3a5a;align-self:stretch;flex-shrink:0}
+.composite-panel{width:140px;text-align:center;flex-shrink:0;padding:0 10px}
+.composite-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2a4a62;margin-bottom:10px}
+.composite-ring{width:88px;height:88px;margin:0 auto 10px}
+.composite-band{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em}
+.composite-note{font-size:10px;color:#2a4a62;line-height:1.5}
+.composite-note span{display:block;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#1e3a52;margin-bottom:3px}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.kpi-card{background:#0D1F3C;border:1px solid #1a3a5a;padding:15px;border-top:2px solid #2E6BAD;position:relative}
+.kpi-card.at-risk{border-top-color:#C0392B}
+.kpi-card.offline{border-top-color:#1a3050;opacity:.6}
+.kpi-domain-label{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#2a4a62;margin-bottom:10px}
+.kpi-num{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:700;color:#fff;line-height:1;margin-bottom:2px}
+.kpi-num.offline{font-size:16px;color:#1e3a52;margin-top:6px}
+.kpi-desc{font-size:11.5px;color:#5B9BD5;margin-bottom:8px}
+.kpi-delta{font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px}
+.kpi-delta.down{color:#E74C3C}
+.kpi-delta.up{color:#4ADE80}
+.kpi-delta.neutral{color:#5B9BD5}
+.kpi-delta.offline{color:#1e3a52;font-style:italic;font-size:10.5px;font-weight:400}
+.kpi-cta{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#2E6BAD;display:block;margin-top:10px;text-decoration:none}
+.kpi-cta:hover{color:#5B9BD5}
+.kpi-cta.offline{color:#1e3a52;pointer-events:none}
+
+/* ── INTEL GRID ── */
+.intel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.intel-card{background:#0D1F3C;border:1px solid #1a3a5a;padding:15px}
+.intel-card.offline{border-style:dashed;opacity:.55}
+.intel-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.intel-domain-tag{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a4a62}
+.signal-pill{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:2px}
+.signal-pill.all-clear{background:#0A2D15;color:#4ADE80;border:1px solid #166534}
+.signal-pill.positive{background:#0A2D15;color:#4ADE80;border:1px solid #166534}
+.signal-pill.attention{background:#2D1400;color:#FEB95A;border:1px solid #7C3D00}
+.signal-pill.action{background:#2D0000;color:#E74C3C;border:1px solid #7C0000}
+.signal-pill.stable{background:#0D1F3C;color:#5B9BD5;border:1px solid #2E6BAD}
+.signal-pill.declining{background:#2D1400;color:#FEB95A;border:1px solid #7C3D00}
+.signal-pill.offline{background:#0A1728;color:#1e3a52;border:1px solid #1a2f4a}
+.intel-title{font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;color:#e0edf7;margin-bottom:6px;line-height:1.35}
+.intel-body{font-size:11.5px;color:#6a92ad;line-height:1.65}
+.intel-body strong{color:#a8c8de}
+
+/* ── BOTTOM ROW ── */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.panel{background:#0D1F3C;border:1px solid #1a3a5a;padding:15px}
+.panel-section-label{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2a4a62;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1a2f4a}
+.risk-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid #0d1e32}
+.risk-item:last-child{border-bottom:none}
+.risk-indicator{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.risk-indicator.red{background:#C0392B}
+.risk-indicator.amber{background:#E67E22}
+.risk-text strong{display:block;font-size:12px;color:#c8dce8;font-weight:600;margin-bottom:2px}
+.risk-text p{font-size:11px;color:#5a8099;line-height:1.5}
+.action-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid #0d1e32}
+.action-item:last-child{border-bottom:none}
+.priority-bar{width:3px;align-self:stretch;border-radius:2px;flex-shrink:0}
+.priority-bar.high{background:#C0392B}
+.priority-bar.medium{background:#E67E22}
+.action-content strong{display:block;font-size:12px;color:#c8dce8;font-weight:600;margin-bottom:2px}
+.action-meta{font-size:10.5px;color:#3a6078;display:flex;gap:10px;flex-wrap:wrap}
+.overdue-tag{color:#E74C3C;font-weight:600}
+.panel-footer{margin-top:12px;text-align:right}
+.panel-footer a{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#2E6BAD;text-decoration:none}
+.panel-footer a:hover{color:#5B9BD5}
+.no-risks{font-size:12px;color:#1e3a52;padding:16px 0;text-align:center;font-style:italic}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .nav{padding:0 16px}
+  .nav-title span{display:none}
+  .nav-link{padding:0 12px;font-size:10px}
+  .page{padding:16px 16px 40px}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .intel-grid{grid-template-columns:1fr}
+  .bottom-row{grid-template-columns:1fr}
+  .health-engine{flex-wrap:wrap;gap:16px}
+  .health-domains{gap:4px}
+  .domain-dial{width:64px;height:64px}
+  .health-divider{display:none}
+  .composite-panel{width:100%;border-top:1px solid #1a3a5a;padding-top:14px;display:flex;align-items:center;gap:16px;text-align:left}
+  .composite-ring{width:60px;height:60px;margin:0}
+  .composite-label{margin-bottom:0;margin-right:4px}
+}
+@media(max-width:600px){
+  .nav{padding:0 12px;height:48px}
+  .nav-title{font-size:10px}
+  .nav-links{display:none}
+  .nav-mobile-menu{display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-left:8px}
+  .nav-mobile-menu::-webkit-scrollbar{display:none}
+  .nav-mobile-link{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#4a7a9b;white-space:nowrap;padding:4px 10px;border:1px solid #1a2f4a;border-radius:2px;text-decoration:none;flex-shrink:0}
+  .nav-mobile-link.active{color:#fff;border-color:#2E6BAD;background:#0D1F3C}
+  .nav-mobile-link.soon{color:#1e3a52;border-color:#0d1e32;pointer-events:none}
+  .role-badge{display:none}
+  .page{padding:12px 12px 32px}
+  .hero-title{font-size:18px}
+  .hero-top{flex-direction:column;gap:8px}
+  .hero-meta{text-align:left}
+  .health-engine{padding:14px;flex-direction:column}
+  .health-domains{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .domain{padding:8px 4px}
+  .domain-dial{width:58px;height:58px}
+  .composite-panel{width:100%;border-top:1px solid #1a3a5a;padding-top:12px;flex-direction:column;text-align:center}
+  .composite-ring{width:70px;height:70px;margin:8px auto}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .kpi-card{padding:12px}
+  .kpi-num{font-size:22px}
+  .intel-grid{grid-template-columns:1fr;gap:8px}
+  .intel-card{padding:12px}
+  .bottom-row{grid-template-columns:1fr;gap:8px}
+  .panel{padding:12px}
+  .section-label{font-size:8.5px;margin-bottom:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- PIN -->
+<div id="pin-screen">
+  <div class="pin-logo-wrap">
+    <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="50" fill="#0D1F3C"/>
+      <circle cx="50" cy="50" r="47" fill="none" stroke="#2E6BAD" stroke-width="3"/>
+      <circle cx="50" cy="51" r="16" fill="white"/>
+      <polygon points="50,38 57,44 54.5,53 45.5,53 43,44" fill="#1a3a5c"/>
+      <path d="M44,36 C42,40 43,44 46,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M50,34 C50,38 50,42 50,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M56,36 C58,40 57,44 54,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="pin-h">Board Command Center</div>
+  <div class="pin-sub">PBG Predators Soccer Division</div>
+  <input type="password" class="pin-field" id="pin-field" maxlength="6" placeholder="&#8226;&#8226;&#8226;&#8226;" autocomplete="off" inputmode="numeric">
+  <button class="pin-go" onclick="doPin()">Access Dashboard</button>
+  <div class="pin-msg" id="pin-msg"></div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;flex-direction:column;min-height:100vh">
+
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-badge">
+        <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="50" fill="#0D1F3C"/>
+          <circle cx="50" cy="50" r="47" fill="none" stroke="#2E6BAD" stroke-width="3"/>
+          <circle cx="50" cy="51" r="16" fill="white"/>
+          <polygon points="50,38 57,44 54.5,53 45.5,53 43,44" fill="#1a3a5c"/>
+          <path d="M44,36 C42,40 43,44 46,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M50,34 C50,38 50,42 50,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M56,36 C58,40 57,44 54,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="nav-title">PBG Predators <span>Board Command Center</span></div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link active" href="index.html">Executive</a>
+      <a class="nav-link" href="governance.html">Governance</a>
+      <a class="nav-link" href="performance.html">Performance</a>
+      <a class="nav-link soon" href="#">Financial <span class="soon-tag">SOON</span></a>
+    </div>
+    <div class="nav-right">
+      <span class="role-badge" id="role-badge"></span>
+      <button class="nav-signout" onclick="signOut()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div id="page-loading" class="page-loading">
+    <div class="spinner"></div>
+    <div class="load-txt">Loading Executive Overview&hellip;</div>
+  </div>
+
+  <div class="page" id="page-content" style="display:none">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-eyebrow">Soccer Division &middot; Board Command Center</div>
+          <div class="hero-title">Executive <em>Overview</em></div>
+        </div>
+        <div class="hero-meta">
+          <div class="hero-meta-label">Last Updated</div>
+          <div class="hero-meta-value" id="last-updated"></div>
+        </div>
+      </div>
+      <div class="hero-summary" id="hero-summary">Loading intelligence&hellip;</div>
+    </div>
+
+    <!-- CLUB HEALTH ENGINE -->
+    <div class="section-label">Club Health Engine</div>
+    <div class="health-engine">
+      <div class="health-domains" id="health-domains"></div>
+      <div class="health-divider"></div>
+      <div class="composite-panel">
+        <div class="composite-label">Club Health Score</div>
+        <div class="composite-ring" id="composite-ring"></div>
+        <div class="composite-note" id="composite-note"></div>
+      </div>
+    </div>
+
+    <!-- PRIMARY KPI LAYER -->
+    <div class="section-label">Primary Intelligence</div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <!-- INTELLIGENCE GRID -->
+    <div class="section-label">Executive Intelligence</div>
+    <div class="intel-grid" id="intel-grid"></div>
+
+    <!-- BOTTOM ROW -->
+    <div class="section-label">Strategic Risk &middot; Executive Actions</div>
+    <div class="bottom-row">
+      <div class="panel">
+        <div class="panel-section-label">Strategic Risk Flags</div>
+        <div id="risk-panel"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-section-label">Executive Action Center</div>
+        <div id="action-center"></div>
+        <div class="panel-footer"><a href="governance.html">View All Action Items &rarr;</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = 'https://ijdfydxxyhsufbrsnmte.supabase.co/functions/v1/pin-gateway';
+const SESSION_KEY = 'pbg_session_pin';
+const S_CURRENT = 'c1000000-0000-0000-0000-000000000003';
+const S_PRIOR   = 'c1000000-0000-0000-0000-000000000002';
+
+let ST = { pin: null, isEditor: false };
+
+// ── SESSION RESTORE ───────────────────────────────────────────
+(function() {
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  if (saved === '2847' || saved === '1963') {
+    ST.pin = saved;
+    ST.isEditor = saved === '2847';
+    showApp();
+    loadAll();
+  }
+})();
+
+// ── AUTH ─────────────────────────────────────────────────────
+document.getElementById('pin-field').addEventListener('keydown', e => { if (e.key === 'Enter') doPin(); });
+
+function doPin() {
+  const v = document.getElementById('pin-field').value.trim();
+  if (v === '2847' || v === '1963') {
+    sessionStorage.setItem(SESSION_KEY, v);
+    ST.pin = v; ST.isEditor = v === '2847';
+    showApp();
+    loadAll();
+  } else {
+    const f = document.getElementById('pin-field');
+    document.getElementById('pin-msg').textContent = 'Incorrect PIN.';
+    f.classList.add('shake');
+    setTimeout(() => { f.classList.remove('shake'); document.getElementById('pin-msg').textContent = ''; }, 1500);
+  }
+}
+
+function showApp() {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  const badge = document.getElementById('role-badge');
+  badge.textContent = ST.isEditor ? 'Editor' : 'Viewer';
+  badge.className = 'role-badge ' + (ST.isEditor ? 'role-editor' : 'role-viewer');
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) + ' · ' +
+    now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  buildMobileNav('index.html');
+}
+
+function signOut() {
+  sessionStorage.removeItem(SESSION_KEY);
+  ST.pin = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pin-screen').style.display = 'flex';
+  document.getElementById('pin-field').value = '';
+}
+
+// ── API ───────────────────────────────────────────────────────
+async function apiFetch(resource) {
+  const res = await fetch(`${API}/${resource}`, { headers: { 'x-pin': ST.pin } });
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  return res.json();
+}
+
+// ── LOAD ALL DATA ─────────────────────────────────────────────
+async function loadAll() {
+  try {
+    const [items, meetings, rawConfig, teams, matches] = await Promise.all([
+      apiFetch('items'),
+      apiFetch('meetings'),
+      apiFetch('config'),
+      apiFetch('perf/teams'),
+      apiFetch('perf/matches').catch(() => [])
+    ]);
+
+    // Parse config
+    const configMap = {};
+    (rawConfig || []).forEach(r => { configMap[r.key] = r.value; });
+    const domainCfg = configMap['domain_weights'] || {
+      governance:  { enabled: true,  weight: 25 },
+      competitive: { enabled: true,  weight: 25 },
+      financial:   { enabled: false, weight: 25 },
+      operations:  { enabled: false, weight: 25 }
+    };
+
+    // Build team map
+    const teamMap = {};
+    (teams || []).forEach(t => { teamMap[t.id] = t; });
+
+    // Compute scores
+    const govData  = computeGovernance(items || [], meetings || []);
+    const compData = computeCompetitive(matches || [], teamMap);
+    const composite = computeComposite(govData.score, compData.score, domainCfg);
+
+    // Render
+    document.getElementById('page-loading').style.display = 'none';
+    document.getElementById('page-content').style.display = 'block';
+
+    renderHero(govData, compData);
+    renderHealthEngine(govData, compData, domainCfg, composite);
+    renderKPIs(govData, compData);
+    renderIntel(govData, compData);
+    renderRisks(govData, compData);
+    renderActionCenter(items || []);
+  } catch(e) {
+    document.getElementById('page-loading').innerHTML =
+      `<div style="text-align:center;color:#4a7a9b"><div style="font-size:32px;margin-bottom:12px">&#9888;</div><div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Could not load data</div><div style="font-size:12px;margin-top:8px;color:#2a4a62">${e.message}</div></div>`;
+  }
+}
+
+// ── GOVERNANCE SCORE ──────────────────────────────────────────
+function computeGovernance(items, meetings) {
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Completion Rate (40pts)
+  const eligible = items.filter(i => !['Tabled','On Hold'].includes(i.status));
+  const completed = items.filter(i => i.status === 'Complete');
+  const completionPts = eligible.length ? Math.min(40, (completed.length / eligible.length) * 40) : 20;
+
+  // Overdue Severity (30pts)
+  let overduePts = 30;
+  const overdueItems = items.filter(i =>
+    ['Open','In Progress'].includes(i.status) && i.due_date &&
+    new Date(i.due_date + 'T00:00:00') < today
+  );
+  overdueItems.forEach(i => {
+    const daysAgo = Math.floor((today - new Date(i.due_date + 'T00:00:00')) / 86400000);
+    if (daysAgo < 7) overduePts -= 3;
+    else if (daysAgo <= 30) overduePts -= 6;
+    else overduePts -= 10;
+  });
+  overduePts = Math.max(0, overduePts);
+
+  // Meeting Cadence (20pts)
+  const yearAgo = new Date(); yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+  const recentMeetings = meetings.filter(m => m.date && new Date(m.date + 'T00:00:00') >= yearAgo);
+  let cadencePts = Math.min(20, (recentMeetings.length / 9) * 20);
+  const sortedMtg = meetings.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const lastMeeting = sortedMtg[0];
+  const daysSince = lastMeeting ? Math.floor((today - new Date(lastMeeting.date + 'T00:00:00')) / 86400000) : 999;
+  if (daysSince > 75) cadencePts *= 0.80;
+  else if (daysSince > 45) cadencePts *= 0.90;
+
+  // Resolution Velocity (10pts)
+  const completedDated = completed.filter(i => i.created_at && i.updated_at);
+  let velocityPts = 5;
+  if (completedDated.length > 0) {
+    const avgDays = completedDated.reduce((s,i) => s + Math.max(0, (new Date(i.updated_at) - new Date(i.created_at)) / 86400000), 0) / completedDated.length;
+    velocityPts = avgDays < 14 ? 10 : avgDays < 30 ? 7 : avgDays < 60 ? 4 : 1;
+  }
+
+  const score = Math.min(100, Math.max(0, Math.round(completionPts + overduePts + cadencePts + velocityPts)));
+
+  // Open high-priority items > 30 days old
+  const staleHigh = items.filter(i => i.priority === 'High' && ['Open','In Progress'].includes(i.status) && i.created_at && (today - new Date(i.created_at)) / 86400000 > 30);
+
+  return {
+    score, overdueItems, daysSince, lastMeeting,
+    completionRate: eligible.length ? Math.round(completed.length / eligible.length * 100) : 0,
+    totalItems: items.length, completedItems: completed.length, eligibleItems: eligible.length,
+    meetingCount: recentMeetings.length, staleHigh,
+    openItems: items.filter(i => ['Open','In Progress'].includes(i.status))
+  };
+}
+
+// ── COMPETITIVE SCORE ─────────────────────────────────────────
+function computeCompetitive(matches, teamMap) {
+  if (!matches || matches.length === 0) return { score: 0, insufficient: true };
+
+  function processMatches(seasonId) {
+    const result = [];
+    matches.filter(m => m.season_id === seasonId && m.status === 'played' && m.competition_type === 'league' && m.home_score != null && m.away_score != null)
+      .forEach(m => {
+        if (m.home_team_id && teamMap[m.home_team_id] && !teamMap[m.home_team_id].exclude) {
+          result.push({ teamId: m.home_team_id, gf: m.home_score, ga: m.away_score, result: m.home_score > m.away_score ? 'W' : m.home_score < m.away_score ? 'L' : 'D', tier: teamMap[m.home_team_id].program_tier });
+        }
+        if (m.away_team_id && teamMap[m.away_team_id] && !teamMap[m.away_team_id].exclude) {
+          if (m.home_team_id && teamMap[m.home_team_id]) return;
+          result.push({ teamId: m.away_team_id, gf: m.away_score, ga: m.home_score, result: m.away_score > m.home_score ? 'W' : m.away_score < m.home_score ? 'L' : 'D', tier: teamMap[m.away_team_id].program_tier });
+        }
+      });
+    return result;
+  }
+
+  const cur = processMatches(S_CURRENT);
+  const pri = processMatches(S_PRIOR);
+  if (cur.length < 5) return { score: 0, insufficient: true, gamesPlayed: cur.length };
+
+  // Win Rate (35pts)
+  const W = cur.filter(g=>g.result==='W').length, GP = cur.length;
+  const L = cur.filter(g=>g.result==='L').length, D = cur.filter(g=>g.result==='D').length;
+  const winPct = Math.round(W/GP*100);
+  const winPts = winPct>=70?35:winPct>=60?28:winPct>=50?20:winPct>=40?12:5;
+
+  // Trajectory (30pts)
+  const curByTeam={}, priByTeam={};
+  cur.forEach(g => { if(!curByTeam[g.teamId]) curByTeam[g.teamId]=[]; curByTeam[g.teamId].push(g); });
+  pri.forEach(g => { if(!priByTeam[g.teamId]) priByTeam[g.teamId]=[]; priByTeam[g.teamId].push(g); });
+  const deltas = Object.keys(curByTeam).filter(t => priByTeam[t]).map(t => {
+    const cWR = curByTeam[t].filter(g=>g.result==='W').length / curByTeam[t].length;
+    const pWR = priByTeam[t].filter(g=>g.result==='W').length / priByTeam[t].length;
+    return (cWR - pWR * (curByTeam[t].length / priByTeam[t].length)) * 100;
+  });
+  const avgDelta = deltas.length ? deltas.reduce((a,b)=>a+b,0)/deltas.length : 0;
+  const trajPts = avgDelta>=5?30:avgDelta>=2?22:avgDelta>=-2?14:avgDelta>=-5?7:2;
+
+  // GD (20pts)
+  const GF = cur.reduce((s,g)=>s+g.gf,0), GA = cur.reduce((s,g)=>s+g.ga,0);
+  const gdpg = (GF-GA)/GP;
+  const gdPts = gdpg>=1.5?20:gdpg>=0.75?15:gdpg>=0?10:gdpg>=-0.75?5:1;
+
+  // Platform tier (15pts)
+  const platGames = cur.filter(g=>['GA','ECNL','NPL'].includes(g.tier));
+  const platWR = platGames.length ? Math.round(platGames.filter(g=>g.result==='W').length/platGames.length*100) : 0;
+  const platPts = platWR>=65?15:platWR>=50?11:platWR>=40?7:3;
+
+  // Prior WR for delta
+  const priorWR = pri.length ? Math.round(pri.filter(g=>g.result==='W').length/pri.length*100) : null;
+  const wrDelta = priorWR != null ? Math.round((winPct - priorWR)*10)/10 : null;
+
+  // Boys vs girls
+  const girlsGames = cur.filter(g => teamMap[g.teamId]?.program_side === 'Girls');
+  const boysGames  = cur.filter(g => teamMap[g.teamId]?.program_side === 'Boys');
+  const girlsWR = girlsGames.length ? Math.round(girlsGames.filter(g=>g.result==='W').length/girlsGames.length*100) : null;
+  const boysWR  = boysGames.length  ? Math.round(boysGames.filter(g=>g.result==='W').length/boysGames.length*100) : null;
+
+  return {
+    score: Math.min(100, Math.max(0, Math.round(winPts+trajPts+gdPts+platPts))),
+    winPct, priorWinPct: priorWR, wrDelta,
+    gamesPlayed: GP, W, L, D,
+    gdpg: Math.round(gdpg*10)/10,
+    avgDelta: Math.round(avgDelta*10)/10,
+    trajTeams: deltas.length, platWR, girlsWR, boysWR,
+    teamCount: Object.keys(curByTeam).length
+  };
+}
+
+// ── COMPOSITE SCORE ───────────────────────────────────────────
+function computeComposite(govScore, compScore, cfg) {
+  const enabled = [];
+  let weightSum = 0, composite = 0;
+  if (cfg.governance?.enabled && govScore != null) { enabled.push('Governance'); const w=cfg.governance.weight; weightSum+=w; composite+=govScore*w; }
+  if (cfg.competitive?.enabled && compScore != null && compScore > 0) { enabled.push('Competitive'); const w=cfg.competitive.weight; weightSum+=w; composite+=compScore*w; }
+  if (!enabled.length || !weightSum) return { score: null, enabled, partial: true };
+  return { score: Math.round(composite/weightSum), enabled, partial: enabled.length < 4 };
+}
+
+// ── RENDER HERO ───────────────────────────────────────────────
+function renderHero(gov, comp) {
+  let parts = [];
+  if (gov.overdueItems.length > 0) {
+    const n = gov.overdueItems.length;
+    parts.push(`<strong>${n} action item${n>1?'s are':' is'} overdue</strong> and require board attention before the next meeting.`);
+  } else {
+    parts.push('<strong>All action items are on track.</strong>');
+  }
+  if (!comp.insufficient) {
+    if (comp.wrDelta !== null && comp.wrDelta > 1) {
+      parts.push(`The competitive program is tracking <strong>above last season</strong> across ${comp.teamCount} teams in the current season.`);
+    } else if (comp.wrDelta !== null && comp.wrDelta < -1) {
+      parts.push(`Competitive performance is <strong>trending below last season</strong> — merits review at the next board meeting.`);
+    } else {
+      parts.push(`The competitive program is <strong>stable vs last season</strong> with a ${comp.winPct}% win rate across ${comp.teamCount} teams.`);
+    }
+  }
+  const offlineModules = ['Financial','Operations'];
+  if (offlineModules.length > 0) {
+    parts.push(`${offlineModules.join(' and ')} intelligence is not yet connected — Club Health Score will activate when all four domains are live.`);
+  }
+  document.getElementById('hero-summary').innerHTML = parts.join(' ');
+}
+
+// ── RENDER HEALTH ENGINE ──────────────────────────────────────
+function dialSVG(score, color, label, active) {
+  const C = 194.78; // 2πr where r=31
+  if (!active) {
+    return `<svg viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="38" cy="38" r="31" fill="none" stroke="#1a2f4a" stroke-width="5.5" stroke-dasharray="8 5"/>
+      <text x="38" y="35" font-family="Montserrat,sans-serif" font-size="9.5" fill="#1e3a52" text-anchor="middle" font-weight="500">No</text>
+      <text x="38" y="48" font-family="Montserrat,sans-serif" font-size="9.5" fill="#1e3a52" text-anchor="middle" font-weight="500">Data</text>
+    </svg>`;
+  }
+  const fill = (score / 100) * C;
+  return `<svg viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="38" cy="38" r="31" fill="none" stroke="#1a3050" stroke-width="5.5"/>
+    <circle cx="38" cy="38" r="31" fill="none" stroke="${color}" stroke-width="5.5"
+      stroke-dasharray="${fill.toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="49" stroke-linecap="round"
+      transform="rotate(-90 38 38)"/>
+    <text x="38" y="43" font-family="Montserrat,sans-serif" font-size="15" font-weight="700" fill="white" text-anchor="middle">${score}</text>
+  </svg>`;
+}
+
+function compositeColor(score) {
+  if (score >= 80) return '#4ADE80';
+  if (score >= 60) return '#2E6BAD';
+  if (score >= 40) return '#E67E22';
+  return '#C0392B';
+}
+function compositeLabel(score) {
+  if (score >= 80) return 'Healthy';
+  if (score >= 60) return 'Stable';
+  if (score >= 40) return 'Watch';
+  return 'At Risk';
+}
+
+function renderHealthEngine(gov, comp, cfg, composite) {
+  const domains = [
+    { key: 'governance',  label: 'Governance',  color: '#2E6BAD', score: gov.score,  active: cfg.governance?.enabled },
+    { key: 'competitive', label: 'Competitive', color: '#5B9BD5', score: comp.insufficient ? 0 : comp.score, active: cfg.competitive?.enabled && !comp.insufficient },
+    { key: 'financial',   label: 'Financial',   color: '#E6C65A', score: 0, active: cfg.financial?.enabled },
+    { key: 'operations',  label: 'Operations',  color: '#3ABFB0', score: 0, active: cfg.operations?.enabled },
+  ];
+
+  document.getElementById('health-domains').innerHTML = domains.map(d => `
+    <div class="domain">
+      <div class="domain-dial">${dialSVG(d.score, d.color, d.label, d.active)}</div>
+      <div class="domain-name${d.active?'':' muted'}">${d.label}</div>
+      <div class="domain-trend${d.active?'':' muted'}">${d.active ? '&#8593; Active' : 'Awaiting connection'}</div>
+    </div>`).join('');
+
+  // Composite ring
+  const C2 = 226.19; // 2π*36
+  if (composite.score == null) {
+    document.getElementById('composite-ring').innerHTML = `<svg viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="44" cy="44" r="36" fill="none" stroke="#1a2f4a" stroke-width="6" stroke-dasharray="8 5"/>
+      <text x="44" y="40" font-family="Montserrat,sans-serif" font-size="9.5" font-weight="600" fill="#1e3a52" text-anchor="middle">PARTIAL</text>
+      <text x="44" y="54" font-family="Montserrat,sans-serif" font-size="8.5" fill="#162a3a" text-anchor="middle">${composite.enabled.length} of 4</text>
+    </svg>`;
+    document.getElementById('composite-note').innerHTML = `<span>Incomplete</span>Connect Financial &amp; Operations to activate the composite score`;
+  } else {
+    const fill2 = (composite.score / 100) * C2;
+    const col = compositeColor(composite.score);
+    const lbl = compositeLabel(composite.score);
+    document.getElementById('composite-ring').innerHTML = `<svg viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="44" cy="44" r="36" fill="none" stroke="#1a3050" stroke-width="6"/>
+      <circle cx="44" cy="44" r="36" fill="none" stroke="${col}" stroke-width="6"
+        stroke-dasharray="${fill2.toFixed(1)} ${C2.toFixed(1)}" stroke-dashoffset="57" stroke-linecap="round"
+        transform="rotate(-90 44 44)"/>
+      <text x="44" y="41" font-family="Montserrat,sans-serif" font-size="18" font-weight="700" fill="white" text-anchor="middle">${composite.score}</text>
+      <text x="44" y="55" font-family="Montserrat,sans-serif" font-size="9" font-weight="600" fill="${col}" text-anchor="middle">${lbl.toUpperCase()}</text>
+    </svg>`;
+    if (composite.partial) {
+      document.getElementById('composite-note').innerHTML = `<span>Partial Score</span>Based on ${composite.enabled.length} of 4 domains &mdash; ${composite.enabled.join(' + ')}`;
+    } else {
+      document.getElementById('composite-note').innerHTML = `<span>${lbl}</span>All four domains active`;
+    }
+  }
+}
+
+// ── RENDER KPIs ───────────────────────────────────────────────
+function renderKPIs(gov, comp) {
+  const govAtRisk = gov.overdueItems.length > 0;
+  const compWinPct = comp.insufficient ? null : comp.winPct;
+  const compDelta = comp.wrDelta;
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card ${govAtRisk ? 'at-risk' : ''}">
+      <div class="kpi-domain-label">Governance</div>
+      <div class="kpi-num">${gov.overdueItems.length}</div>
+      <div class="kpi-desc">Overdue action items</div>
+      <div class="kpi-delta ${govAtRisk ? 'down' : 'up'}">${govAtRisk ? '&#8595; ' + gov.overdueItems.length + ' past due date' : '&#10003; All items on track'}</div>
+      <a class="kpi-cta" href="governance.html">View Action Items &rarr;</a>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-domain-label">Competitive</div>
+      <div class="kpi-num">${compWinPct != null ? compWinPct + '%' : '&mdash;'}</div>
+      <div class="kpi-desc">Program win rate &middot; 2025/26</div>
+      <div class="kpi-delta ${compDelta == null ? 'neutral' : compDelta > 0 ? 'up' : 'down'}">${compDelta != null ? (compDelta > 0 ? '&#8593;' : '&#8595;') + ' ' + Math.abs(compDelta) + 'pts vs last season' : compWinPct != null ? comp.gamesPlayed + ' games played' : 'Insufficient data'}</div>
+      <a class="kpi-cta" href="performance.html">View Performance &rarr;</a>
+    </div>
+    <div class="kpi-card offline">
+      <div class="kpi-domain-label">Financial</div>
+      <div class="kpi-num offline">&mdash;</div>
+      <div class="kpi-desc">Budget vs actuals</div>
+      <div class="kpi-delta offline">Financial module not yet connected</div>
+      <a class="kpi-cta offline">Coming Soon</a>
+    </div>
+    <div class="kpi-card offline">
+      <div class="kpi-domain-label">Operations</div>
+      <div class="kpi-num offline">&mdash;</div>
+      <div class="kpi-desc">Registration status</div>
+      <div class="kpi-delta offline">Operations module not yet connected</div>
+      <a class="kpi-cta offline">Coming Soon</a>
+    </div>`;
+}
+
+// ── RENDER INTEL CARDS ────────────────────────────────────────
+function renderIntel(gov, comp) {
+  const n = gov.overdueItems.length;
+  const govSignal = n >= 3 ? ['action','Action Required'] : n >= 1 ? ['attention','Attention'] : ['all-clear','All Clear'];
+  const govTitle = n >= 3 ? 'Board follow-through requires attention' : n >= 1 ? 'Action items need resolution' : 'Governance execution is on track';
+  const govBody = n > 0
+    ? `${n} of ${gov.totalItems} tracked action items are past their target date. ${gov.completedItems} of ${gov.eligibleItems} eligible items have been completed (${gov.completionRate}%). <strong>Review overdue items at the next board meeting.</strong>`
+    : `${gov.completedItems} of ${gov.eligibleItems} eligible items completed (${gov.completionRate}%). Last meeting ${gov.daysSince} days ago. Board execution is meeting expectations.`;
+
+  let compSignal, compTitle, compBody;
+  if (comp.insufficient) {
+    compSignal = ['offline','No Data']; compTitle = 'Insufficient competitive data';
+    compBody = 'Current season data is still building. Return once more league matches have been recorded.';
+  } else if (comp.avgDelta > 2) {
+    compSignal = ['positive','Positive Trend'];
+    compTitle = 'Program trajectory is improving';
+    compBody = `Platform teams are tracking ${Math.abs(comp.avgDelta).toFixed(1)} points above last season in win rate. Program win rate is ${comp.winPct}% across ${comp.gamesPlayed} league games. Goal differential is ${comp.gdpg >= 0 ? '+' : ''}${comp.gdpg} per game. <strong>${comp.platWR}% win rate among top-tier platform teams.</strong>`;
+  } else if (comp.avgDelta < -2) {
+    compSignal = ['declining','Watch'];
+    compTitle = 'Competitive performance trending below prior season';
+    compBody = `Program win rate is ${comp.winPct}% — tracking ${Math.abs(comp.avgDelta).toFixed(1)} points below this point last season. Goal differential is ${comp.gdpg >= 0 ? '+' : ''}${comp.gdpg} per game. <strong>Competitive review recommended at next DOC briefing.</strong>`;
+  } else {
+    compSignal = ['stable','Stable'];
+    compTitle = 'Competitive program is stable';
+    compBody = `Program win rate is ${comp.winPct}% across ${comp.gamesPlayed} league games — tracking near last season's pace. Goal differential is ${comp.gdpg >= 0 ? '+' : ''}${comp.gdpg} per game. ${comp.girlsWR != null && comp.boysWR != null ? `Girls at ${comp.girlsWR}%, Boys at ${comp.boysWR}%.` : ''}`;
+  }
+
+  document.getElementById('intel-grid').innerHTML = `
+    <div class="intel-card">
+      <div class="intel-top"><span class="intel-domain-tag">Governance</span><span class="signal-pill ${govSignal[0]}">${govSignal[1]}</span></div>
+      <div class="intel-title">${govTitle}</div>
+      <div class="intel-body">${govBody}</div>
+    </div>
+    <div class="intel-card">
+      <div class="intel-top"><span class="intel-domain-tag">Competitive</span><span class="signal-pill ${compSignal[0]}">${compSignal[1]}</span></div>
+      <div class="intel-title">${compTitle}</div>
+      <div class="intel-body">${compBody}</div>
+    </div>
+    <div class="intel-card offline">
+      <div class="intel-top"><span class="intel-domain-tag">Financial</span><span class="signal-pill offline">No Data</span></div>
+      <div class="intel-title">Financial intelligence offline</div>
+      <div class="intel-body">Connect the Financial module to surface budget health, registration revenue vs target, payroll sustainability, and forecast indicators here.</div>
+    </div>
+    <div class="intel-card offline">
+      <div class="intel-top"><span class="intel-domain-tag">Operations</span><span class="signal-pill offline">No Data</span></div>
+      <div class="intel-title">Operations intelligence offline</div>
+      <div class="intel-body">Connect the Operations module to surface registration status by tier, staffing alignment, field utilization, and program capacity here.</div>
+    </div>`;
+}
+
+// ── RENDER RISKS ──────────────────────────────────────────────
+function renderRisks(gov, comp) {
+  const risks = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Governance risks
+  if (gov.overdueItems.length > 2) {
+    risks.push({ color:'red', title:'Governance execution gap', body:`${gov.overdueItems.length} overdue items — board accountability requires attention before items compound further.` });
+  }
+  if (gov.daysSince > 60) {
+    risks.push({ color:'red', title:'No board meeting in ' + gov.daysSince + ' days', body:'Extended gap between meetings may delay resolution of open action items and strategic decisions.' });
+  }
+  if (gov.staleHigh && gov.staleHigh.length > 0) {
+    risks.push({ color:'amber', title:`${gov.staleHigh.length} high-priority item${gov.staleHigh.length>1?'s':''} unresolved for 30+ days`, body:'High-priority action items are aging without resolution. Review at next meeting.' });
+  }
+
+  // Competitive risks
+  if (!comp.insufficient) {
+    if (comp.avgDelta < -2) {
+      risks.push({ color:'amber', title:'Competitive trajectory declining', body:`Program tracking ${Math.abs(comp.avgDelta).toFixed(1)} points below last season's win rate. DOC review recommended.` });
+    }
+    if (comp.gdpg < -0.75) {
+      risks.push({ color:'amber', title:'Negative goal differential trend', body:`Program conceding ${Math.abs(comp.gdpg).toFixed(1)} more goals per game than scoring. Defensive review warranted.` });
+    }
+    if (comp.boysWR != null && comp.girlsWR != null && Math.abs(comp.boysWR - comp.girlsWR) > 10) {
+      const lower = comp.boysWR < comp.girlsWR ? `Boys (${comp.boysWR}%)` : `Girls (${comp.girlsWR}%)`;
+      const higher = comp.boysWR > comp.girlsWR ? `Boys (${comp.boysWR}%)` : `Girls (${comp.girlsWR}%)`;
+      risks.push({ color:'amber', title:`${lower} program underperforming`, body:`${Math.abs(comp.boysWR-comp.girlsWR)}pt gap vs ${higher}. Merits a competitive review at the next DOC briefing.` });
+    }
+  }
+
+  // Static structural risks
+  risks.push({ color:'amber', title:'Financial health unmonitored', body:'Budget and registration data are not connected. The board has no real-time financial visibility.' });
+  risks.push({ color:'amber', title:'Operations data not connected', body:'Registration status and staffing data are not yet in the system.' });
+
+  // Sort red first
+  risks.sort((a,b) => a.color === 'red' && b.color !== 'red' ? -1 : b.color === 'red' && a.color !== 'red' ? 1 : 0);
+
+  if (risks.length === 0) {
+    document.getElementById('risk-panel').innerHTML = '<div class="no-risks">No active risk flags</div>';
+    return;
+  }
+  document.getElementById('risk-panel').innerHTML = risks.map(r => `
+    <div class="risk-item">
+      <div class="risk-indicator ${r.color}"></div>
+      <div class="risk-text"><strong>${r.title}</strong><p>${r.body}</p></div>
+    </div>`).join('');
+}
+
+// ── RENDER ACTION CENTER ──────────────────────────────────────
+function renderActionCenter(items) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const actionItems = items
+    .filter(i => ['Open','In Progress'].includes(i.status) && (i.priority === 'High' || (i.due_date && new Date(i.due_date+'T00:00:00') < today)))
+    .sort((a,b) => {
+      const pa = a.priority==='High'?0:a.priority==='Medium'?1:2;
+      const pb = b.priority==='High'?0:b.priority==='Medium'?1:2;
+      if (pa !== pb) return pa - pb;
+      return (a.due_date||'9').localeCompare(b.due_date||'9');
+    })
+    .slice(0, 5);
+
+  if (actionItems.length === 0) {
+    document.getElementById('action-center').innerHTML = '<div class="no-risks">No urgent action items</div>';
+    return;
+  }
+  document.getElementById('action-center').innerHTML = actionItems.map(i => {
+    const isOverdue = i.due_date && new Date(i.due_date+'T00:00:00') < today;
+    const desc = i.description.length > 60 ? i.description.substring(0,60)+'…' : i.description;
+    return `<div class="action-item">
+      <div class="priority-bar ${i.priority === 'High' ? 'high' : 'medium'}"></div>
+      <div class="action-content">
+        <strong>${esc(desc)}</strong>
+        <div class="action-meta">
+          ${isOverdue ? '<span class="overdue-tag">Overdue</span>' : ''}
+          <span>${esc(i.owner || 'Unassigned')}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MOBILE NAV ────────────────────────────────────────────────
+function buildMobileNav(activePage) {
+  const pages = [
+    { label:'Executive', href:'index.html' },
+    { label:'Governance', href:'governance.html' },
+    { label:'Performance', href:'performance.html' },
+    { label:'Financial', href:'#', soon:true }
+  ];
+  function apply() {
+    const navLinks = document.querySelector('.nav-links');
+    if (!navLinks) return;
+    let strip = document.querySelector('.nav-mobile-menu');
+    if (window.innerWidth <= 600) {
+      navLinks.style.display = 'none';
+      if (!strip) {
+        strip = document.createElement('div');
+        strip.className = 'nav-mobile-menu';
+        strip.innerHTML = pages.map(p => `<a class="nav-mobile-link${p.href===activePage?' active':''}${p.soon?' soon':''}" href="${p.href}">${p.label}</a>`).join('');
+        navLinks.parentNode.insertBefore(strip, navLinks);
+      }
+    } else {
+      navLinks.style.display = 'flex';
+      if (strip) strip.remove();
+    }
+  }
+  apply();
+  window.addEventListener('resize', apply);
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
