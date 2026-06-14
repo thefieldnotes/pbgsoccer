@@ -358,12 +358,27 @@ async function apiFetch(resource) {
 }
 
 // ── LOAD DATA ─────────────────────────────────────────────────
+
+// ── DERIVE TIER FROM COMPETITION TIER MAP ────────────────────
+function deriveTier(competitionName) {
+  if (!competitionName) return { tier: '—', category: 'tournament' };
+  const name = competitionName.toLowerCase();
+  for (const rule of ST.tierMap) { // sorted by priority desc at load time
+    if (name.includes(rule.pattern.toLowerCase())) {
+      return { tier: rule.tier, category: rule.category };
+    }
+  }
+  return { tier: '—', category: 'tournament' };
+}
+
 async function loadData() {
   try {
-    const [rawMatches, rawTeams] = await Promise.all([
+    const [rawMatches, rawTeams, rawTierMap] = await Promise.all([
       apiFetch('perf/matches?limit=5000'),
-      apiFetch('perf/teams')
+      apiFetch('perf/teams'),
+      apiFetch('perf/competition-tier-map')
     ]);
+    ST.tierMap = (rawTierMap || []).slice().sort((a, b) => b.priority - a.priority);
 
     // Build team map
     ST.teams = {};
@@ -387,15 +402,16 @@ async function loadData() {
           seasonName: SEASON_NAMES[m.season_id] || '—',
           teamId: team.id,
           team: team,
-          tier: team.program_tier || 'Other',
-          level: team.program_level,
+          tier: deriveTier(m.competition_name).tier,
+          category: deriveTier(m.competition_name).category,
+          level: m.age_group != null ? (m.age_group <= 12 ? 'Academy' : 'Platform') : null,
           programSide: team.program_side,
           gender: m.gender,
           ageGroup: m.age_group,
           result,
           gf, ga,
           gd: (gf != null && ga != null) ? gf - ga : null,
-          competitionType: m.competition_type,
+          competitionType: deriveTier(m.competition_name).category,
           status: m.status,
           date: m.match_date,
           isHome: true
@@ -418,15 +434,16 @@ async function loadData() {
           seasonName: SEASON_NAMES[m.season_id] || '—',
           teamId: team.id,
           team: team,
-          tier: team.program_tier || 'Other',
-          level: team.program_level,
+          tier: deriveTier(m.competition_name).tier,
+          category: deriveTier(m.competition_name).category,
+          level: m.age_group != null ? (m.age_group <= 12 ? 'Academy' : 'Platform') : null,
           programSide: team.program_side,
           gender: m.gender,
           ageGroup: m.age_group,
           result,
           gf, ga,
           gd: (gf != null && ga != null) ? gf - ga : null,
-          competitionType: m.competition_type,
+          competitionType: deriveTier(m.competition_name).category,
           status: m.status,
           date: m.match_date,
           isHome: false
@@ -892,14 +909,18 @@ function renderAgeBreakdown(matches) {
     if (!team) return;
     const s = computeStats(arr);
     if (s.GP < 3) return;
-    teamStats.push({ team, stats: s });
+    // Derive era from majority of matches' age_group
+    const eraVotes = { Academy: 0, Platform: 0 };
+    arr.forEach(m => { if (m.level) eraVotes[m.level] = (eraVotes[m.level] || 0) + 1; });
+    const era = eraVotes.Platform > eraVotes.Academy ? 'Platform' : eraVotes.Academy > 0 ? 'Academy' : null;
+    teamStats.push({ team, stats: s, era });
   });
 
-  const academy = teamStats.filter(t => t.team.program_level === 'Academy')
+  const academy = teamStats.filter(t => t.era === 'Academy')
     .sort((a,b) => (b.team.birth_year||0)-(a.team.birth_year||0));
-  const platform = teamStats.filter(t => t.team.program_level === 'Platform')
+  const platform = teamStats.filter(t => t.era === 'Platform')
     .sort((a,b) => (b.team.birth_year||0)-(a.team.birth_year||0));
-  const other = teamStats.filter(t => !t.team.program_level)
+  const other = teamStats.filter(t => !t.era)
     .sort((a,b) => (b.team.birth_year||0)-(a.team.birth_year||0));
 
   function ageRows(arr) {
