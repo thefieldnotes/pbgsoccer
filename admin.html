@@ -264,7 +264,7 @@ var CSV_RAW_NAMES = [["05/06 GA", 24], ["06/07G GA", 3], ["07/06G GA", 21], ["07
 var ST = { pin: null, tab: 'unmapped', teams: [], aliases: [], seasons: [], editingTeam: null, mappingRaw: null, excludeVal: false };
 
 document.getElementById('pin-logo').src = LOGO_DATA;
-document.getElementById('hdr-logo').src = LOGO_DATA;
+var hl = document.getElementById('hdr-logo'); if(hl) hl.src = LOGO_DATA;
 
 document.getElementById('pin-field').addEventListener('keydown', function(e) { if (e.key === 'Enter') doPin(); });
 
