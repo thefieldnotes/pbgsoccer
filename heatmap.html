@@ -283,29 +283,28 @@ function deriveTier(cn){
 }
 
 function computeHeatData(){
-  // Build per-team per-season stats keyed by era ('Platform','Academy','all')
-  // Era derived from age_group on each match: <=12 = Academy, >=13 = Platform
+  // Build per-team per-season stats keyed STRICTLY by era.
+  // Era is derived from age_group on each match (matches performance.html logic exactly):
+  //   age_group <= 12 -> Academy
+  //   age_group >= 13 -> Platform
+  //   age_group null  -> match excluded from era-specific stats (same as performance.html)
+  // No 'all' fallback bucket — era-specific only, empty cell if no era data exists.
   const data={};// teamId -> seasonId -> era -> {W,D,L,GF,GA}
   for(const m of ST.matches){
     if(m.status!=='played'||m.home_score==null||m.away_score==null)continue;
     const d=deriveTier(m.competition_name);
     if(d.category!=='league')continue;
-    const matchEra=m.age_group!=null?(m.age_group<=12?'Academy':'Platform'):null;
+    // Skip match if age_group unknown — cannot era-classify
+    if(m.age_group==null)continue;
+    const matchEra=m.age_group<=12?'Academy':'Platform';
+    const sid=m.season_id;
     function rec(team,gf,ga){
       if(!team||team.exclude)return;
       if(!data[team.id])data[team.id]={};
-      if(!data[team.id][m.season_id])data[team.id][m.season_id]={};
-      const bySeason=data[team.id][m.season_id];
-      // Always accumulate into 'all' bucket
-      if(!bySeason['all'])bySeason['all']={W:0,D:0,L:0,GF:0,GA:0};
-      const sa=bySeason['all'];
-      sa.GF+=gf;sa.GA+=ga;if(gf>ga)sa.W++;else if(gf<ga)sa.L++;else sa.D++;
-      // Also accumulate into era-specific bucket if age_group is known
-      if(matchEra){
-        if(!bySeason[matchEra])bySeason[matchEra]={W:0,D:0,L:0,GF:0,GA:0};
-        const se=bySeason[matchEra];
-        se.GF+=gf;se.GA+=ga;if(gf>ga)se.W++;else if(gf<ga)se.L++;else se.D++;
-      }
+      if(!data[team.id][sid])data[team.id][sid]={};
+      if(!data[team.id][sid][matchEra])data[team.id][sid][matchEra]={W:0,D:0,L:0,GF:0,GA:0};
+      const s=data[team.id][sid][matchEra];
+      s.GF+=gf;s.GA+=ga;if(gf>ga)s.W++;else if(gf<ga)s.L++;else s.D++;
     }
     if(m.home_team_id&&ST.teams[m.home_team_id])rec(ST.teams[m.home_team_id],m.home_score,m.away_score);
     if(m.away_team_id&&ST.teams[m.away_team_id])rec(ST.teams[m.away_team_id],m.away_score,m.home_score);
@@ -314,10 +313,8 @@ function computeHeatData(){
 }
 
 function getCellData(teamId,seasonId,era){
-  // Use era-specific stats when era is provided; fall back to 'all' only if no era data
-  const bySeason=ST.heatData[teamId]?.[seasonId];
-  if(!bySeason)return null;
-  const s=(era&&bySeason[era])?bySeason[era]:bySeason['all'];
+  // Strict era lookup — no fallback. Empty cell if no era-specific data exists.
+  const s=ST.heatData[teamId]?.[seasonId]?.[era];
   if(!s)return null;
   const GP=s.W+s.D+s.L;
   if(GP<3)return null;
