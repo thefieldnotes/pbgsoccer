@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBG Predators — Program Heat Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-size:13px;min-height:100vh}
+#pin-screen{position:fixed;inset:0;background:#0A1728;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:32px 24px}
+.pin-logo-wrap{width:72px;height:72px;border-radius:50%;border:2px solid #2E6BAD;background:#0D1F3C;display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 0 28px rgba(46,107,173,.4)}
+.pin-h{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:3px;text-align:center}
+.pin-sub{font-size:9px;color:#5B9BD5;margin-bottom:26px;text-align:center;font-family:'Montserrat',sans-serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.pin-field{width:100%;max-width:280px;background:#0D1F3C;border:2px solid #1a3a5a;border-radius:2px;color:#fff;font-size:24px;font-weight:700;letter-spacing:12px;padding:12px 16px;text-align:center;outline:none;-webkit-text-security:disc;margin-bottom:10px;font-family:'Montserrat',sans-serif}
+.pin-field:focus{border-color:#2E6BAD}
+.pin-field.shake{animation:shake .35s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+.pin-go{width:100%;max-width:280px;background:#2E6BAD;color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:2px;padding:12px;font-family:'Montserrat',sans-serif;cursor:pointer}
+.pin-go:hover{background:#5B9BD5}
+.pin-msg{min-height:18px;margin-top:8px;font-size:12px;color:#C0392B;text-align:center}
+.nav{background:#06101E;border-bottom:1px solid #1a2f4a;padding:0 28px;display:flex;align-items:center;height:54px;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px;margin-right:36px;flex-shrink:0}
+.nav-badge{width:34px;height:34px;border-radius:50%;border:1.5px solid #2E6BAD;background:#0D1F3C;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:#fff;text-transform:uppercase;line-height:1.3;white-space:nowrap}
+.nav-title span{color:#5B9BD5;display:block;font-size:9px;font-weight:500;letter-spacing:.07em;margin-top:1px}
+.nav-links{display:flex;align-items:stretch;flex:1}
+.nav-link{padding:0 18px;display:flex;align-items:center;font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#4a7a9b;border-bottom:2px solid transparent;height:54px;text-decoration:none;transition:color .15s;white-space:nowrap}
+.nav-link:hover{color:#fff}
+.nav-link.active{color:#fff;border-bottom-color:#2E6BAD}
+.nav-link.soon{color:#2a4a62;pointer-events:none}
+.nav-link.soon .soon-tag{font-size:7px;background:#0D2035;color:#2E6BAD;padding:1px 5px;border-radius:2px;margin-left:6px;letter-spacing:.04em;border:1px solid #1a3a5a;vertical-align:middle}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.nav-role-badge{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:2px}
+.nav-role-editor{background:#3D1F00;color:#FEB95A;border:1px solid #7C3D00}
+.nav-role-viewer{background:#0D1F3C;color:#5B9BD5;border:1px solid #2E6BAD}
+.nav-signout-btn{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#2a4a62;cursor:pointer;padding:5px 10px;border:1px solid #1a3050;border-radius:2px;background:transparent;transition:all .15s}
+.nav-signout-btn:hover{color:#fff;border-color:#2E6BAD}
+.page{max-width:1100px;margin:0 auto;padding:20px 24px 56px}
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:14px;color:#4a7a9b}
+.spinner{width:26px;height:26px;border:3px solid #1a2f4a;border-top-color:#2E6BAD;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.back-link{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#2E6BAD;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:6px}
+.back-link:hover{color:#5B9BD5}
+.page-title{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:3px}
+.page-sub{font-size:11.5px;color:#3a6078}
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a4a62;white-space:nowrap}
+.filter-btn{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;padding:4px 10px;border:1px solid #1a3a5a;background:transparent;color:#4a7a9b;cursor:pointer;border-radius:2px;transition:all .15s}
+.filter-btn.active{background:#0D1F3C;color:#fff;border-color:#2E6BAD}
+.filter-divider{width:1px;height:20px;background:#1a2f4a;flex-shrink:0}
+.metric-toggle{display:flex;gap:0;margin-left:auto}
+.metric-btn{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;padding:4px 12px;border:1px solid #1a3a5a;background:transparent;color:#3a6078;cursor:pointer;letter-spacing:.04em;transition:all .15s;margin-right:-1px}
+.metric-btn:first-child{border-radius:2px 0 0 2px}
+.metric-btn:last-child{border-radius:0 2px 2px 0;margin-right:0}
+.metric-btn.active{background:#0D1F3C;color:#5B9BD5;border-color:#2E6BAD;position:relative;z-index:1}
+.legend-card{background:#0D1F3C;border:1px solid #1a3a5a;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.legend-label-txt{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a4a62;white-space:nowrap;min-width:48px}
+.legend-scale{display:flex;align-items:center;gap:5px;flex:1;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#5a8099}
+.legend-swatch{width:22px;height:12px;border-radius:1px;flex-shrink:0}
+.legend-note{font-size:10px;color:#2a4a62;margin-left:auto;white-space:nowrap}
+.heat-wrap{background:#0D1F3C;border:1px solid #1a3a5a;overflow-x:auto}
+.heat-table{width:100%;border-collapse:collapse;font-size:12px;min-width:700px}
+.heat-table thead tr th{background:#06101E;padding:10px 12px;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a4a62;text-align:center;border-bottom:1px solid #1a2f4a;white-space:nowrap}
+.heat-table thead tr th.team-col{text-align:left;min-width:180px;padding-left:16px}
+.era-section-header td{background:#06101E;padding:7px 16px;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border-top:1px solid #1a2f4a;border-bottom:1px solid #1a2f4a}
+.era-section-header td span{padding:2px 8px;border-radius:2px}
+.era-section-header td span.platform{background:#0D2035;color:#5B9BD5;border:1px solid #1a4a7a}
+.era-section-header td span.academy{background:#2D1A00;color:#FEB95A;border:1px solid #7C3D00}
+.heat-table tbody tr:hover td{background:#0a1f38}
+.heat-table tbody td{padding:6px 8px;border-bottom:1px solid rgba(26,47,74,.5)}
+.team-cell{padding:7px 8px 7px 16px!important;white-space:nowrap}
+.team-name{font-size:11.5px;font-weight:600;color:#c8dce8;cursor:pointer;transition:color .15s}
+.team-name:hover{color:#5B9BD5;text-decoration:underline}
+.tier-pill{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:600;letter-spacing:.05em;padding:1px 5px;border-radius:2px;margin-left:6px;vertical-align:middle}
+.tp-ECNL{background:#0D2035;color:#2E6BAD}
+.tp-GA,.tp-Aspire{background:#0D2035;color:#5B9BD5}
+.tp-NPL{background:#0D2D2D;color:#2E9B8B}
+.tp-DPL{background:#1a1a35;color:#7B9BD5}
+.tp-EDP,.tp-TFL{background:#2D1A00;color:#E67E22}
+.tp-SFUYSA{background:#1a1a2D;color:#9B7ED5}
+.heat-cell{text-align:center;padding:5px 8px}
+.cell-inner{display:inline-flex;align-items:center;justify-content:center;border-radius:3px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;min-width:62px;cursor:pointer;transition:opacity .15s}
+.cell-inner:hover{opacity:.8}
+.cell-empty{display:inline-flex;align-items:center;justify-content:center;min-width:62px;color:#1a3050;font-size:10px}
+/* Win% scale */
+.wp-vhigh{background:#166534;color:#d1fae5}
+.wp-high{background:#15803D;color:#bbf7d0}
+.wp-good{background:#1f6b3a;color:#a7f3d0}
+.wp-pos{background:#1e4d2e;color:#6ee7b7}
+.wp-mid{background:#2D2200;color:#fde68a}
+.wp-low{background:#7C2D12;color:#fed7aa}
+.wp-vlow{background:#991B1B;color:#fecaca}
+/* GD scale */
+.gd-vhigh{background:#166534;color:#d1fae5}
+.gd-high{background:#15803D;color:#bbf7d0}
+.gd-good{background:#1f6b3a;color:#a7f3d0}
+.gd-pos{background:#1e4d2e;color:#6ee7b7}
+.gd-neut{background:#1a3a2a;color:#4ade80}
+.gd-neg{background:#2D1A00;color:#fdba74}
+.gd-bad{background:#7C2D12;color:#fed7aa}
+.gd-vbad{background:#991B1B;color:#fecaca}
+@media(max-width:900px){.nav{padding:0 16px}.nav-title span{display:none}.nav-link{padding:0 12px;font-size:10px}}
+@media(max-width:600px){
+  .page{padding:12px 12px 36px}.nav{padding:0 12px;height:48px}.nav-title span{display:none}
+  .nav-links{display:none}
+  .nav-mobile-menu{display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-left:8px}
+  .nav-mobile-menu::-webkit-scrollbar{display:none}
+  .nav-mobile-link{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#4a7a9b;white-space:nowrap;padding:4px 10px;border:1px solid #1a2f4a;border-radius:2px;text-decoration:none;flex-shrink:0}
+  .nav-mobile-link.active{color:#fff;border-color:#2E6BAD;background:#0D1F3C}
+  .filter-bar{gap:6px}.metric-toggle{margin-left:0}.legend-note{display:none}
+  .nav-role-badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="pin-screen">
+  <div class="pin-logo-wrap">
+    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="50" fill="#0D1F3C"/><circle cx="50" cy="50" r="47" fill="none" stroke="#2E6BAD" stroke-width="3"/>
+      <circle cx="50" cy="51" r="16" fill="white"/><polygon points="50,38 57,44 54.5,53 45.5,53 43,44" fill="#1a3a5c"/>
+      <path d="M44,36 C42,40 43,44 46,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M50,34 C50,38 50,42 50,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M56,36 C58,40 57,44 54,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="pin-h">Program Heat Map</div>
+  <div class="pin-sub">PBG Predators Soccer</div>
+  <input type="password" class="pin-field" id="pin-field" maxlength="6" placeholder="••••" autocomplete="off" inputmode="numeric">
+  <button class="pin-go" onclick="doPin()">Access Dashboard</button>
+  <div class="pin-msg" id="pin-msg"></div>
+</div>
+
+<div id="app" style="display:none;flex-direction:column;min-height:100vh">
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-badge">
+        <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="50" fill="#0D1F3C"/><circle cx="50" cy="50" r="47" fill="none" stroke="#2E6BAD" stroke-width="3"/>
+          <circle cx="50" cy="51" r="16" fill="white"/><polygon points="50,38 57,44 54.5,53 45.5,53 43,44" fill="#1a3a5c"/>
+          <path d="M44,36 C42,40 43,44 46,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M50,34 C50,38 50,42 50,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M56,36 C58,40 57,44 54,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="nav-title">PBG Predators <span>Board Command Center</span></div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Executive</a>
+      <a class="nav-link" href="governance.html">Governance</a>
+      <a class="nav-link active" href="performance.html">Performance</a>
+      <a class="nav-link soon" href="#">Financial <span class="soon-tag">SOON</span></a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-role-badge" id="nav-role-badge"></span>
+      <button class="nav-signout-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div id="page-loading" class="page-loading">
+    <div class="spinner"></div>
+    <div class="load-txt">Loading Heat Map…</div>
+  </div>
+
+  <div class="page" id="page-content" style="display:none">
+    <div class="page-header">
+      <div>
+        <a href="performance.html" class="back-link">&#8592; Program Dashboard</a>
+        <div class="page-title">Program Heat Map</div>
+        <div class="page-sub">League play only &middot; All teams &times; 3 seasons &middot; Click team name to open cohort detail</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Season</span>
+        <button class="filter-btn active" onclick="setFilter('season','all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('season','c1000000-0000-0000-0000-000000000001',this)">2023/24</button>
+        <button class="filter-btn" onclick="setFilter('season','c1000000-0000-0000-0000-000000000002',this)">2024/25</button>
+        <button class="filter-btn" onclick="setFilter('season','c1000000-0000-0000-0000-000000000003',this)">2025/26</button>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-group">
+        <span class="filter-label">Program</span>
+        <button class="filter-btn active" onclick="setFilter('program','all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('program','Platform',this)">Platform</button>
+        <button class="filter-btn" onclick="setFilter('program','Academy',this)">Academy</button>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-group">
+        <span class="filter-label">Gender</span>
+        <button class="filter-btn active" onclick="setFilter('gender','all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('gender','Girls',this)">Girls</button>
+        <button class="filter-btn" onclick="setFilter('gender','Boys',this)">Boys</button>
+      </div>
+      <div class="metric-toggle">
+        <button class="metric-btn active" id="btnWP" onclick="setMetric('wp')">Win %</button>
+        <button class="metric-btn" id="btnGD" onclick="setMetric('gd')">GD / Game</button>
+      </div>
+    </div>
+    <div class="legend-card">
+      <div class="legend-label-txt" id="legendLabel">Win %</div>
+      <div class="legend-scale" id="legendScale"></div>
+      <div class="legend-note">League play only &middot; Click team name to open cohort detail</div>
+    </div>
+    <div class="heat-wrap" id="heat-wrap"></div>
+  </div>
+</div>
+
+<script>
+const API='https://ijdfydxxyhsufbrsnmte.supabase.co/functions/v1/pin-gateway';
+const SESSION_KEY='pbg_session_pin';
+const SEASON_ORDER=['c1000000-0000-0000-0000-000000000001','c1000000-0000-0000-0000-000000000002','c1000000-0000-0000-0000-000000000003'];
+const SEASON_NAMES={'c1000000-0000-0000-0000-000000000001':'2023/24','c1000000-0000-0000-0000-000000000002':'2024/25','c1000000-0000-0000-0000-000000000003':'2025/26'};
+
+let ST={pin:null,isEditor:false,matches:[],teams:{},tierMap:[],metric:'wp',filters:{season:'all',program:'all',gender:'all'},heatData:{}};
+
+(function(){
+  const s=sessionStorage.getItem(SESSION_KEY);
+  if(s==='2847'||s==='1963'){ST.pin=s;ST.isEditor=s==='2847';showApp();loadAll();}
+})();
+
+document.getElementById('pin-field').addEventListener('keydown',e=>{if(e.key==='Enter')doPin();});
+function doPin(){
+  const v=document.getElementById('pin-field').value.trim();
+  if(v==='2847'||v==='1963'){
+    sessionStorage.setItem(SESSION_KEY,v);ST.pin=v;ST.isEditor=v==='2847';showApp();loadAll();
+  }else{
+    const f=document.getElementById('pin-field');
+    document.getElementById('pin-msg').textContent='Incorrect PIN.';
+    f.classList.add('shake');setTimeout(()=>{f.classList.remove('shake');document.getElementById('pin-msg').textContent='';},1400);
+  }
+}
+function showApp(){
+  document.getElementById('pin-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  const nb=document.getElementById('nav-role-badge');
+  if(nb){nb.textContent=ST.isEditor?'Editor':'Viewer';nb.className='nav-role-badge '+(ST.isEditor?'nav-role-editor':'nav-role-viewer');}
+  buildMobileNav();
+}
+function signOut(){
+  sessionStorage.removeItem(SESSION_KEY);ST.pin=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('pin-screen').style.display='flex';
+  document.getElementById('pin-field').value='';
+}
+
+async function apiFetch(r){
+  const res=await fetch(`${API}/${r}`,{headers:{'x-pin':ST.pin}});
+  if(!res.ok)throw new Error(`${r}: ${res.status}`);
+  return res.json();
+}
+
+async function loadAll(){
+  try{
+    const[rawMatches,rawTeams,rawTierMap]=await Promise.all([
+      apiFetch('perf/matches'),
+      apiFetch('perf/teams'),
+      apiFetch('perf/competition-tier-map')
+    ]);
+    ST.teams={};(rawTeams||[]).forEach(t=>{ST.teams[t.id]=t;});
+    ST.tierMap=(rawTierMap||[]).slice().sort((a,b)=>b.priority-a.priority);
+    ST.matches=rawMatches||[];
+    computeHeatData();
+    document.getElementById('page-loading').style.display='none';
+    document.getElementById('page-content').style.display='block';
+    renderLegend();
+    renderTable();
+  }catch(e){
+    document.getElementById('page-loading').innerHTML=`<div style="text-align:center;color:#4a7a9b"><div style="font-size:28px;margin-bottom:10px">&#9888;</div><div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Could not load data</div><div style="font-size:11px;margin-top:6px;color:#2a4a62">${e.message}</div></div>`;
+  }
+}
+
+function deriveTier(cn){
+  if(!cn)return{tier:'—',category:'tournament'};
+  const name=cn.toLowerCase();
+  for(const rule of ST.tierMap){if(name.includes(rule.pattern.toLowerCase()))return{tier:rule.tier,category:rule.category};}
+  return{tier:'—',category:'tournament'};
+}
+
+function computeHeatData(){
+  // Build per-team per-season stats (league matches only)
+  const data={};// teamId -> seasonId -> {W,D,L,GF,GA}
+  for(const m of ST.matches){
+    if(m.status!=='played'||m.home_score==null||m.away_score==null)continue;
+    const d=deriveTier(m.competition_name);
+    if(d.category!=='league')continue;
+    function rec(team,gf,ga){
+      if(!team||team.exclude)return;
+      if(!data[team.id])data[team.id]={};
+      if(!data[team.id][m.season_id])data[team.id][m.season_id]={W:0,D:0,L:0,GF:0,GA:0};
+      const s=data[team.id][m.season_id];
+      s.GF+=gf;s.GA+=ga;
+      if(gf>ga)s.W++;else if(gf<ga)s.L++;else s.D++;
+    }
+    if(m.home_team_id&&ST.teams[m.home_team_id])rec(ST.teams[m.home_team_id],m.home_score,m.away_score);
+    if(m.away_team_id&&ST.teams[m.away_team_id])rec(ST.teams[m.away_team_id],m.away_score,m.home_score);
+  }
+  ST.heatData=data;
+}
+
+function getCellData(teamId,seasonId){
+  const s=ST.heatData[teamId]?.[seasonId];
+  if(!s)return null;
+  const GP=s.W+s.D+s.L;
+  if(GP<3)return null;
+  const wp=Math.round(s.W/GP*100);
+  const gdpg=(s.GF-s.GA)/GP;
+  return{wp,gdpg:Math.round(gdpg*100)/100,GP};
+}
+
+function wpClass(v){
+  if(v>=85)return'wp-vhigh';if(v>=75)return'wp-high';if(v>=65)return'wp-good';
+  if(v>=55)return'wp-pos';if(v>=45)return'wp-mid';if(v>=35)return'wp-low';return'wp-vlow';
+}
+function gdClass(v){
+  if(v>=2.0)return'gd-vhigh';if(v>=1.25)return'gd-high';if(v>=0.75)return'gd-good';
+  if(v>=0.25)return'gd-pos';if(v>=-0.25)return'gd-neut';if(v>=-0.75)return'gd-neg';
+  if(v>=-1.25)return'gd-bad';return'gd-vbad';
+}
+
+function tierPillClass(tier){
+  const map={ECNL:'tp-ECNL',GA:'tp-GA',Aspire:'tp-Aspire',NPL:'tp-NPL',DPL:'tp-DPL',EDP:'tp-EDP',TFL:'tp-TFL',SFUYSA:'tp-SFUYSA'};
+  return map[tier]||'';
+}
+
+function getVisibleSeasons(){
+  if(ST.filters.season==='all')return SEASON_ORDER;
+  return[ST.filters.season];
+}
+
+// Group teams by section
+function getSections(){
+  const allTeams=Object.values(ST.teams).filter(t=>!t.exclude&&t.organization_id==='b1000000-0000-0000-0000-000000000001');
+  const pf=ST.filters.program,gf=ST.filters.gender;
+  const sections=[
+    {label:'Platform Girls',eraBadge:'platform',era:'Platform',side:'Girls'},
+    {label:'Platform Boys',eraBadge:'platform',era:'Platform',side:'Boys'},
+    {label:'Academy Girls',eraBadge:'academy',era:'Academy',side:'Girls'},
+    {label:'Academy Boys',eraBadge:'academy',era:'Academy',side:'Boys'}
+  ];
+  return sections.filter(sec=>{
+    if(pf!=='all'&&sec.era!==pf)return false;
+    if(gf!=='all'&&sec.side!==gf)return false;
+    return true;
+  }).map(sec=>{
+    const teams=allTeams
+      .filter(t=>t.program_side===sec.side)
+      .filter(t=>{
+        // Classify era by looking at matches
+        const hasEraMatch=Object.keys(ST.heatData[t.id]||{}).some(sid=>{
+          const m=ST.matches.find(m=>(m.home_team_id===t.id||m.away_team_id===t.id)&&m.season_id===sid&&m.age_group!=null);
+          if(!m)return false;
+          return sec.era==='Platform'?m.age_group>=13:m.age_group<=12;
+        });
+        // Fallback: use canonical team program_level
+        if(!hasEraMatch&&t.program_level){
+          return t.program_level===sec.era;
+        }
+        return hasEraMatch||t.program_level===sec.era;
+      })
+      .sort((a,b)=>(b.birth_year||0)-(a.birth_year||0)||(a.canonical_name||'').localeCompare(b.canonical_name||''));
+    return{...sec,teams};
+  }).filter(sec=>sec.teams.length>0);
+}
+
+function renderTable(){
+  const seasons=getVisibleSeasons();
+  const sections=getSections();
+  const m=ST.metric;
+  let html=`<table class="heat-table"><thead><tr><th class="team-col">Team</th><th>Tier</th>`;
+  seasons.forEach(sid=>html+=`<th>${SEASON_NAMES[sid]}</th>`);
+  html+=`</tr></thead><tbody>`;
+  sections.forEach(sec=>{
+    html+=`<tr class="era-section-header"><td colspan="${2+seasons.length}"><span class="${sec.eraBadge}">${sec.label}</span></td></tr>`;
+    sec.teams.forEach(t=>{
+      const tier=t.program_tier||'—';
+      const tpClass=tierPillClass(tier);
+      html+=`<tr><td class="team-cell"><span class="team-name" onclick="goTeam('${t.id}')">${esc(t.canonical_name)}</span><span class="tier-pill ${tpClass}">${tier}</span></td><td style="text-align:center"><span class="tier-pill ${tpClass}" style="margin-left:0">${tier}</span></td>`;
+      seasons.forEach(sid=>{
+        const cd=getCellData(t.id,sid);
+        if(!cd){html+=`<td class="heat-cell"><div class="cell-empty">&mdash;</div></td>`;return;}
+        const cls=m==='wp'?wpClass(cd.wp):gdClass(cd.gdpg);
+        const val=m==='wp'?cd.wp+'%':(cd.gdpg>=0?'+':'')+cd.gdpg.toFixed(2);
+        html+=`<td class="heat-cell"><div class="cell-inner ${cls}" onclick="goTeam('${t.id}')" title="${esc(t.canonical_name)} · ${SEASON_NAMES[sid]}">${val}</div></td>`;
+      });
+      html+=`</tr>`;
+    });
+  });
+  html+=`</tbody></table>`;
+  document.getElementById('heat-wrap').innerHTML=html;
+}
+
+function renderLegend(){
+  const m=ST.metric;
+  document.getElementById('legendLabel').textContent=m==='wp'?'Win %':'GD / Game';
+  document.getElementById('legendScale').innerHTML=m==='wp'?`
+    <div class="legend-item"><div class="legend-swatch wp-vhigh"></div>85%+</div>
+    <div class="legend-item"><div class="legend-swatch wp-high"></div>75%</div>
+    <div class="legend-item"><div class="legend-swatch wp-good"></div>65%</div>
+    <div class="legend-item"><div class="legend-swatch wp-pos"></div>55%</div>
+    <div class="legend-item"><div class="legend-swatch wp-mid"></div>45%</div>
+    <div class="legend-item"><div class="legend-swatch wp-low"></div>35%</div>
+    <div class="legend-item"><div class="legend-swatch wp-vlow"></div>&lt;35%</div>`:`
+    <div class="legend-item"><div class="legend-swatch gd-vhigh"></div>+2.0+</div>
+    <div class="legend-item"><div class="legend-swatch gd-high"></div>+1.25</div>
+    <div class="legend-item"><div class="legend-swatch gd-good"></div>+0.75</div>
+    <div class="legend-item"><div class="legend-swatch gd-pos"></div>+0.25</div>
+    <div class="legend-item"><div class="legend-swatch gd-neut"></div>0</div>
+    <div class="legend-item"><div class="legend-swatch gd-neg"></div>&minus;0.75</div>
+    <div class="legend-item"><div class="legend-swatch gd-bad"></div>&minus;1.25</div>
+    <div class="legend-item"><div class="legend-swatch gd-vbad"></div>&minus;2.0+</div>`;
+}
+
+function setMetric(m){
+  ST.metric=m;
+  document.getElementById('btnWP').classList.toggle('active',m==='wp');
+  document.getElementById('btnGD').classList.toggle('active',m==='gd');
+  renderLegend();renderTable();
+}
+
+function setFilter(type,val,btn){
+  document.querySelectorAll(`.filter-group .filter-btn`).forEach(b=>{
+    if(b.closest('.filter-group')===btn.closest('.filter-group'))b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  ST.filters[type]=val;
+  renderTable();
+}
+
+function goTeam(id){window.location.href=`team-detail.html?team=${id}`;}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function buildMobileNav(){
+  const pages=[{label:'Executive',href:'index.html'},{label:'Governance',href:'governance.html'},{label:'Performance',href:'performance.html'},{label:'Financial',href:'#',soon:true}];
+  function apply(){
+    const nl=document.querySelector('.nav-links');if(!nl)return;
+    let strip=document.querySelector('.nav-mobile-menu');
+    if(window.innerWidth<=600){
+      nl.style.display='none';
+      if(!strip){strip=document.createElement('div');strip.className='nav-mobile-menu';
+        strip.innerHTML=pages.map(p=>`<a class="nav-mobile-link${p.href==='performance.html'?' active':''}${p.soon?' soon':''}" href="${p.href}">${p.label}</a>`).join('');
+        nl.parentNode.insertBefore(strip,nl);}
+    }else{nl.style.display='flex';if(strip)strip.remove();}
+  }
+  apply();window.addEventListener('resize',apply);
+}
+</script>
+</body>
+</html>
