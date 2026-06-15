@@ -66,11 +66,27 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
 .hero-summary{background:#0D1F3C;border-left:3px solid #2E6BAD;padding:11px 16px;font-size:12.5px;color:#8ab0cc;line-height:1.65;border-radius:0 2px 2px 0}
 .hero-summary strong{color:#e0edf7}
 
-/* ── CLUB HEALTH ENGINE ── */
+/* ── CLUB HEALTH SCORE STRIP ── */
+.health-score-strip{display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:10px 16px;background:#0D1F3C;border:1px solid #1a3a5a;border-left:3px solid #2E6BAD}
+.hss-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#2a4a62}
+.hss-score{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:700;color:#fff;line-height:1}
+.hss-band{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:2px}
+.hss-partial{font-size:11px;color:#2a4a62;margin-left:auto}
+
+/* ── SCORE LEGEND ── */
+.score-legend{margin-top:10px;padding-top:8px;border-top:1px solid #1a2f4a;display:flex;flex-direction:column;gap:3px}
+.sl-row{display:flex;align-items:center;gap:6px;font-size:10px;color:#3a6078;font-family:'Montserrat',sans-serif}
+.sl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sl-dot.green{background:#4ADE80}
+.sl-dot.blue{background:#2E6BAD}
+.sl-dot.amber{background:#E67E22}
+.sl-dot.red{background:#C0392B}
+
+/* ── HEALTH ENGINE ── */
 .health-engine{background:#0D1F3C;border:1px solid #1a3a5a;padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;gap:20px}
 .health-domains{display:flex;gap:8px;flex:1}
 .domain{flex:1;text-align:center;padding:4px 8px}
-.domain-dial{width:76px;height:76px;margin:0 auto 9px}
+.domain-dial{width:92px;height:92px;margin:0 auto 9px}
 .domain-name{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#5B9BD5;margin-bottom:3px}
 .domain-name.muted{color:#1e3a52}
 .domain-score-val{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:#5B9BD5}
@@ -155,7 +171,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
   .bottom-row{grid-template-columns:1fr}
   .health-engine{flex-wrap:wrap;gap:16px}
   .health-domains{gap:4px}
-  .domain-dial{width:64px;height:64px}
+  .domain-dial{width:76px;height:76px}
   .health-divider{display:none}
   .composite-panel{width:100%;border-top:1px solid #1a3a5a;padding-top:14px;display:flex;align-items:center;gap:16px;text-align:left}
   .composite-ring{width:60px;height:60px;margin:0}
@@ -178,7 +194,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
   .health-engine{padding:14px;flex-direction:column}
   .health-domains{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .domain{padding:8px 4px}
-  .domain-dial{width:58px;height:58px}
+  .domain-dial{width:70px;height:70px}
   .composite-panel{width:100%;border-top:1px solid #1a3a5a;padding-top:12px;flex-direction:column;text-align:center}
   .composite-ring{width:70px;height:70px;margin:8px auto}
   .kpi-grid{grid-template-columns:1fr 1fr;gap:8px}
@@ -197,15 +213,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
 <!-- PIN -->
 <div id="pin-screen">
   <div class="pin-logo-wrap">
-    <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="50" fill="#0D1F3C"/>
-      <circle cx="50" cy="50" r="47" fill="none" stroke="#2E6BAD" stroke-width="3"/>
-      <circle cx="50" cy="51" r="16" fill="white"/>
-      <polygon points="50,38 57,44 54.5,53 45.5,53 43,44" fill="#1a3a5c"/>
-      <path d="M44,36 C42,40 43,44 46,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-      <path d="M50,34 C50,38 50,42 50,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-      <path d="M56,36 C58,40 57,44 54,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    </svg>
+    <img src="pbglogonew.png" alt="PBG Predators" style="width:64px;height:64px;object-fit:contain;border-radius:50%;">
   </div>
   <div class="pin-h">Board Command Center</div>
   <div class="pin-sub">PBG Predators Soccer Division</div>
@@ -220,15 +228,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
   <nav class="nav">
     <div class="nav-logo">
       <div class="nav-badge">
-        <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="50" cy="50" r="50" fill="#0D1F3C"/>
-          <circle cx="50" cy="50" r="47" fill="none" stroke="#2E6BAD" stroke-width="3"/>
-          <circle cx="50" cy="51" r="16" fill="white"/>
-          <polygon points="50,38 57,44 54.5,53 45.5,53 43,44" fill="#1a3a5c"/>
-          <path d="M44,36 C42,40 43,44 46,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-          <path d="M50,34 C50,38 50,42 50,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-          <path d="M56,36 C58,40 57,44 54,47" stroke="#2E6BAD" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-        </svg>
+        <img src="pbglogonew.png" alt="PBG" style="width:26px;height:26px;object-fit:contain;border-radius:50%;">
       </div>
       <div class="nav-title">PBG Predators <span>Board Command Center</span></div>
     </div>
@@ -266,6 +266,14 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
       <div class="hero-summary" id="hero-summary">Loading intelligence&hellip;</div>
     </div>
 
+    <!-- CLUB HEALTH SCORE STRIP -->
+    <div class="health-score-strip" id="health-score-strip" style="display:none">
+      <div class="hss-label">Club Health Score</div>
+      <div class="hss-score" id="hss-score">—</div>
+      <div class="hss-band" id="hss-band"></div>
+      <div class="hss-partial" id="hss-partial"></div>
+    </div>
+
     <!-- CLUB HEALTH ENGINE -->
     <div class="section-label">Club Health Engine</div>
     <div class="health-engine">
@@ -275,6 +283,12 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
         <div class="composite-label">Club Health Score</div>
         <div class="composite-ring" id="composite-ring"></div>
         <div class="composite-note" id="composite-note"></div>
+        <div class="score-legend">
+          <div class="sl-row"><span class="sl-dot green"></span>80–100 &nbsp;Healthy</div>
+          <div class="sl-row"><span class="sl-dot blue"></span>60–79 &nbsp;&nbsp;Stable</div>
+          <div class="sl-row"><span class="sl-dot amber"></span>40–59 &nbsp;&nbsp;Watch</div>
+          <div class="sl-row"><span class="sl-dot red"></span>0–39 &nbsp;&nbsp;&nbsp;At Risk</div>
+        </div>
       </div>
     </div>
 
@@ -610,6 +624,27 @@ function compositeLabel(score) {
 }
 
 function renderHealthEngine(gov, comp, cfg, composite) {
+  // Populate score strip above section label
+  const strip = document.getElementById('health-score-strip');
+  if (composite.score != null) {
+    const col = compositeColor(composite.score);
+    const lbl = compositeLabel(composite.score);
+    document.getElementById('hss-score').textContent = composite.score;
+    const band = document.getElementById('hss-band');
+    band.textContent = lbl;
+    band.style.background = col + '22';
+    band.style.color = col;
+    band.style.border = '1px solid ' + col + '55';
+    document.getElementById('hss-partial').textContent = composite.partial ? `${composite.enabled.length} of 4 domains` : 'All 4 domains active';
+    strip.style.display = 'flex';
+    strip.style.borderLeftColor = col;
+  } else {
+    document.getElementById('hss-score').textContent = '—';
+    document.getElementById('hss-band').textContent = 'Incomplete';
+    document.getElementById('hss-partial').textContent = `${composite.enabled.length} of 4 domains connected`;
+    strip.style.display = 'flex';
+  }
+
   const domains = [
     { key: 'governance',  label: 'Governance',  color: '#2E6BAD', score: gov.score,  active: cfg.governance?.enabled },
     { key: 'competitive', label: 'Competitive', color: '#5B9BD5', score: comp.insufficient ? 0 : comp.score, active: cfg.competitive?.enabled && !comp.insufficient },

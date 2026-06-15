@@ -283,19 +283,29 @@ function deriveTier(cn){
 }
 
 function computeHeatData(){
-  // Build per-team per-season stats (league matches only)
-  const data={};// teamId -> seasonId -> {W,D,L,GF,GA}
+  // Build per-team per-season stats keyed by era ('Platform','Academy','all')
+  // Era derived from age_group on each match: <=12 = Academy, >=13 = Platform
+  const data={};// teamId -> seasonId -> era -> {W,D,L,GF,GA}
   for(const m of ST.matches){
     if(m.status!=='played'||m.home_score==null||m.away_score==null)continue;
     const d=deriveTier(m.competition_name);
     if(d.category!=='league')continue;
+    const matchEra=m.age_group!=null?(m.age_group<=12?'Academy':'Platform'):null;
     function rec(team,gf,ga){
       if(!team||team.exclude)return;
       if(!data[team.id])data[team.id]={};
-      if(!data[team.id][m.season_id])data[team.id][m.season_id]={W:0,D:0,L:0,GF:0,GA:0};
-      const s=data[team.id][m.season_id];
-      s.GF+=gf;s.GA+=ga;
-      if(gf>ga)s.W++;else if(gf<ga)s.L++;else s.D++;
+      if(!data[team.id][m.season_id])data[team.id][m.season_id]={};
+      const bySeason=data[team.id][m.season_id];
+      // Always accumulate into 'all' bucket
+      if(!bySeason['all'])bySeason['all']={W:0,D:0,L:0,GF:0,GA:0};
+      const sa=bySeason['all'];
+      sa.GF+=gf;sa.GA+=ga;if(gf>ga)sa.W++;else if(gf<ga)sa.L++;else sa.D++;
+      // Also accumulate into era-specific bucket if age_group is known
+      if(matchEra){
+        if(!bySeason[matchEra])bySeason[matchEra]={W:0,D:0,L:0,GF:0,GA:0};
+        const se=bySeason[matchEra];
+        se.GF+=gf;se.GA+=ga;if(gf>ga)se.W++;else if(gf<ga)se.L++;else se.D++;
+      }
     }
     if(m.home_team_id&&ST.teams[m.home_team_id])rec(ST.teams[m.home_team_id],m.home_score,m.away_score);
     if(m.away_team_id&&ST.teams[m.away_team_id])rec(ST.teams[m.away_team_id],m.away_score,m.home_score);
@@ -303,8 +313,11 @@ function computeHeatData(){
   ST.heatData=data;
 }
 
-function getCellData(teamId,seasonId){
-  const s=ST.heatData[teamId]?.[seasonId];
+function getCellData(teamId,seasonId,era){
+  // Use era-specific stats when era is provided; fall back to 'all' only if no era data
+  const bySeason=ST.heatData[teamId]?.[seasonId];
+  if(!bySeason)return null;
+  const s=(era&&bySeason[era])?bySeason[era]:bySeason['all'];
   if(!s)return null;
   const GP=s.W+s.D+s.L;
   if(GP<3)return null;
@@ -382,7 +395,7 @@ function renderTable(){
       const tpClass=tierPillClass(tier);
       html+=`<tr><td class="team-cell"><span class="team-name" onclick="goTeam('${t.id}')">${esc(t.canonical_name)}</span><span class="tier-pill ${tpClass}">${tier}</span></td><td style="text-align:center"><span class="tier-pill ${tpClass}" style="margin-left:0">${tier}</span></td>`;
       seasons.forEach(sid=>{
-        const cd=getCellData(t.id,sid);
+        const cd=getCellData(t.id,sid,sec.era);
         if(!cd){html+=`<td class="heat-cell"><div class="cell-empty">&mdash;</div></td>`;return;}
         const cls=m==='wp'?wpClass(cd.wp):gdClass(cd.gdpg);
         const val=m==='wp'?cd.wp+'%':(cd.gdpg>=0?'+':'')+cd.gdpg.toFixed(2);

@@ -343,7 +343,10 @@ function matchPerspective(m){
   const gf=isHome?m.home_score:m.away_score;
   const ga=isHome?m.away_score:m.home_score;
   const result=gf>ga?'W':gf<ga?'L':'D';
-  const oppName=isHome?m.raw_away_team:m.raw_home_team;
+  // Merge club + team name if club field available; fall back to team name only
+  const rawTeam=isHome?m.raw_away_team:m.raw_home_team;
+  const rawClub=isHome?m.raw_away_club:m.raw_home_club;
+  const oppName=(rawClub&&rawClub!==rawTeam)?rawClub+' · '+rawTeam:rawTeam;
   return{isHome:isHome,gf:gf,ga:ga,result:result,oppName:oppName};
 }
 
@@ -722,8 +725,18 @@ function buildChart(metric,played,birthYear){
 
   const labels=SEASON_ORDER.map(function(s){return SEASON_NAMES[s];});
   const yLabel=metric==='winpct'?'Win %':'Goals';
-  const yMin=metric==='winpct'?20:undefined;
-  const yMax=metric==='winpct'?100:undefined;
+  // Dynamic Y axis — compute from actual data with padding
+  const allChartVals=[...teamData,...benchData].filter(v=>v!==null&&v!==undefined);
+  let yMin,yMax;
+  if(allChartVals.length){
+    const dMin=Math.min(...allChartVals);
+    const dMax=Math.max(...allChartVals);
+    yMin=Math.max(0,Math.floor((dMin-10)/10)*10);
+    yMax=metric==='winpct'?Math.min(100,Math.ceil((dMax+10)/10)*10):Math.ceil((dMax+1)/1)*1+1;
+  } else {
+    yMin=metric==='winpct'?20:undefined;
+    yMax=metric==='winpct'?100:undefined;
+  }
 
   const datasets=[
     {
