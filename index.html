@@ -703,7 +703,7 @@ function renderHealthEngine(gov, comp, ch, cfg, composite) {
     band.style.background = col + '22';
     band.style.color = col;
     band.style.border = '1px solid ' + col + '55';
-    document.getElementById('hss-partial').textContent = composite.partial ? `${composite.enabled.length} of 4 domains` : 'All 4 domains active';
+    document.getElementById('hss-partial').textContent = composite.partial ? `${composite.enabled.join(' + ')} · Financial pending` : 'All 4 domains active';
     strip.style.display = 'flex';
     strip.style.borderLeftColor = col;
   } else {
@@ -714,18 +714,22 @@ function renderHealthEngine(gov, comp, ch, cfg, composite) {
   }
 
   const domains = [
-    { key: 'governance',  label: 'Governance',  color: '#2E6BAD', score: gov.score,  active: cfg.governance?.enabled },
-    { key: 'competitive', label: 'Competitive', color: '#5B9BD5', score: comp.insufficient ? 0 : comp.score, active: cfg.competitive?.enabled && !comp.insufficient },
-    { key: 'club_health', label: 'Club Health', color: '#FEB95A', score: ch.composite, active: ch.composite != null },
-    { key: 'financial',   label: 'Financial',   color: '#E6C65A', score: 0, active: cfg.financial?.enabled },
+    { key: 'governance',  label: 'Governance',  score: gov.score,        active: cfg.governance?.enabled },
+    { key: 'competitive', label: 'Competitive', score: comp.insufficient ? 0 : comp.score, active: cfg.competitive?.enabled && !comp.insufficient },
+    { key: 'club_health', label: 'Club Health', score: ch.composite,      active: ch.composite != null },
+    { key: 'financial',   label: 'Financial',   score: 0,                 active: cfg.financial?.enabled },
   ];
 
-  document.getElementById('health-domains').innerHTML = domains.map(d => `
+  document.getElementById('health-domains').innerHTML = domains.map(d => {
+    const col = d.active && d.score != null ? compositeColor(d.score) : '#1e3a52';
+    const band = d.active && d.score != null ? compositeLabel(d.score) : null;
+    return `
     <div class="domain">
-      <div class="domain-dial">${dialSVG(d.score, d.color, d.label, d.active)}</div>
-      <div class="domain-name${d.active?'':' muted'}">${d.label}</div>
-      <div class="domain-trend${d.active?'':' muted'}">${d.active ? '&#8593; Active' : 'Awaiting connection'}</div>
-    </div>`).join('');
+      <div class="domain-dial">${dialSVG(d.score, col, d.label, d.active)}</div>
+      <div class="domain-name${d.active?'':' muted'}" style="${d.active&&col?'color:'+col:''}">${d.label}</div>
+      <div class="domain-trend${d.active?'':' muted'}" style="${d.active&&col?'color:'+col:''}">${d.active && band ? '⬥ ' + band : 'Awaiting connection'}</div>
+    </div>`;
+  }).join('');
 
   // Composite ring
   const C2 = 226.19; // 2π*36
@@ -749,7 +753,7 @@ function renderHealthEngine(gov, comp, ch, cfg, composite) {
       <text x="44" y="55" font-family="Montserrat,sans-serif" font-size="9" font-weight="600" fill="${col}" text-anchor="middle">${lbl.toUpperCase()}</text>
     </svg>`;
     if (composite.partial) {
-      document.getElementById('composite-note').innerHTML = `<span>Partial Score</span>Based on ${composite.enabled.length} of 4 domains &mdash; ${composite.enabled.join(' + ')}`;
+      document.getElementById('composite-note').innerHTML = `<span>${lbl}</span>${composite.enabled.join(' + ')} &mdash; Financial pending`;
     } else {
       document.getElementById('composite-note').innerHTML = `<span>${lbl}</span>All four domains active`;
     }
@@ -797,11 +801,20 @@ function renderKPIs(gov, comp, ch) {
 
 // ── RENDER INTEL CARDS ────────────────────────────────────────
 function renderIntel(gov, comp, ch) {
-  const n = gov.overdueItems.length;
-  const govSignal = n >= 3 ? ['action','Action Required'] : n >= 1 ? ['attention','Attention'] : ['all-clear','All Clear'];
-  const govTitle = n >= 3 ? 'Board follow-through requires attention' : n >= 1 ? 'Action items need resolution' : 'Governance execution is on track';
-  const govBody = n > 0
-    ? `${n} of ${gov.totalItems} tracked action items are past their target date. ${gov.completedItems} of ${gov.eligibleItems} eligible items have been completed (${gov.completionRate}%). <strong>Review overdue items at the next board meeting.</strong>`
+  // Score-to-signal helper — matches the band legend exactly
+  function scoreSignal(score) {
+    if (score == null) return ['offline','No Data'];
+    if (score >= 80) return ['positive','Healthy'];
+    if (score >= 60) return ['stable','Stable'];
+    if (score >= 40) return ['attention','Watch'];
+    return ['action','At Risk'];
+  }
+
+  // Governance signal — derive from score, not just overdue count
+  const govSignal = scoreSignal(gov.score);
+  const govTitle = gov.overdueItems.length >= 3 ? 'Board follow-through requires attention' : gov.overdueItems.length >= 1 ? 'Action items need resolution' : 'Governance execution is on track';
+  const govBody = gov.overdueItems.length > 0
+    ? `${gov.overdueItems.length} of ${gov.totalItems} tracked action items are past their target date. ${gov.completedItems} of ${gov.eligibleItems} eligible items have been completed (${gov.completionRate}%). <strong>Review overdue items at the next board meeting.</strong>`
     : `${gov.completedItems} of ${gov.eligibleItems} eligible items completed (${gov.completionRate}%). Last meeting ${gov.daysSince} days ago. Board execution is meeting expectations.`;
 
   let compSignal, compTitle, compBody;
@@ -809,24 +822,23 @@ function renderIntel(gov, comp, ch) {
     compSignal = ['offline','No Data']; compTitle = 'Insufficient competitive data';
     compBody = 'Current season data is still building. Return once more league matches have been recorded.';
   } else if (comp.avgDelta > 2) {
-    compSignal = ['positive','Positive Trend'];
+    compSignal = scoreSignal(comp.score);
     compTitle = 'Program trajectory is improving';
     compBody = `Platform teams are tracking ${Math.abs(comp.avgDelta).toFixed(1)} points above last season in win rate. Program win rate is ${comp.winPct}% across ${comp.gamesPlayed} league games. Goal differential is ${comp.gdpg >= 0 ? '+' : ''}${comp.gdpg} per game. <strong>${comp.platWR}% win rate among top-tier platform teams.</strong>`;
   } else if (comp.avgDelta < -2) {
-    compSignal = ['declining','Watch'];
+    compSignal = scoreSignal(comp.score);
     compTitle = 'Competitive performance trending below prior season';
     compBody = `Program win rate is ${comp.winPct}% — tracking ${Math.abs(comp.avgDelta).toFixed(1)} points below this point last season. Goal differential is ${comp.gdpg >= 0 ? '+' : ''}${comp.gdpg} per game. <strong>Competitive review recommended at next DOC briefing.</strong>`;
   } else {
-    compSignal = ['stable','Stable'];
+    compSignal = scoreSignal(comp.score);
     compTitle = 'Competitive program is stable';
     compBody = `Program win rate is ${comp.winPct}% across ${comp.gamesPlayed} league games — tracking near last season's pace. Goal differential is ${comp.gdpg >= 0 ? '+' : ''}${comp.gdpg} per game. ${comp.girlsWR != null && comp.boysWR != null ? `Girls at ${comp.girlsWR}%, Boys at ${comp.boysWR}%.` : ''}`;
   }
 
-  // Club Health intel
-  const chSignal = ch.composite == null ? ['offline','No Data'] :
-    ch.composite >= 60 ? ['stable','Stable'] :
-    ch.composite >= 40 ? ['attention','Watch'] : ['action','At Risk'];
+  // Club Health intel — use same scoreSignal helper
+  const chSignal = scoreSignal(ch.composite);
   const chTitle = ch.composite == null ? 'Club Health data loading' :
+    ch.composite >= 80 ? 'Club Health is healthy' :
     ch.composite >= 60 ? 'Club Health is in stable range' :
     ch.composite >= 40 ? 'Club Health requires board attention' : 'Club Health is at risk';
   const chBody = ch.composite == null ? 'Club Health score is being computed.' :
