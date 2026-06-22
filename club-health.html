@@ -1127,6 +1127,18 @@ function bandFor(score){
   if(score>=40)return{cls:'watch',label:'Watch'};
   return{cls:'atrisk',label:'At Risk'};
 }
+function bandColor(score){
+  if(score>=80)return'#4ADE80';
+  if(score>=60)return'#2E6BAD';
+  if(score>=40)return'#E67E22';
+  return'#C0392B';
+}
+function bandBg(score){
+  if(score>=80)return{bg:'#0d2a0d',border:'#1a6a1a'};
+  if(score>=60)return{bg:'#0D1F3C',border:'#1a4a7a'};
+  if(score>=40)return{bg:'#2D1A00',border:'#7C4500'};
+  return{bg:'#2a0808',border:'#6a1010'};
+}
 
 // ── RENDER ──────────────────────────────────────────────────
 function renderAll(){
@@ -1157,13 +1169,39 @@ function renderAll(){
 
   const composite = develop!=null ? (retain*0.40 + recruit*0.30 + develop*0.30) : null;
 
-  // HERO
-  document.getElementById('hero-composite').textContent = composite!=null? Math.round(composite*10)/10 : '—';
-  const cBand=bandFor(composite||0);
-  document.getElementById('hero-band-badge').textContent='⬥ '+cBand.label;
-  document.getElementById('pillar-retain-num').textContent=Math.round(retain*10)/10;
-  document.getElementById('pillar-recruit-num').textContent=Math.round(recruit*10)/10;
-  document.getElementById('pillar-develop-num').textContent=develop!=null?Math.round(develop*10)/10:'—';
+  // HERO — all colors score-driven to match legend
+  const compositeVal = composite!=null ? Math.round(composite*10)/10 : null;
+  const cBand = bandFor(compositeVal||0);
+  const cCol  = compositeVal!=null ? bandColor(compositeVal) : '#4a6070';
+  const cBgSet = compositeVal!=null ? bandBg(compositeVal) : {bg:'#1a1a1a',border:'#2a2a2a'};
+
+  const heroNum = document.getElementById('hero-composite');
+  heroNum.textContent = compositeVal!=null ? compositeVal : '—';
+  heroNum.style.color = cCol;
+
+  const badge = document.getElementById('hero-band-badge');
+  badge.textContent = '⬥ ' + cBand.label;
+  badge.style.color = cCol;
+  badge.style.background = cBgSet.bg;
+  badge.style.borderColor = cBgSet.border;
+
+  // Pillar score numbers — color from their own score band
+  const rCol = bandColor(retain);
+  const rcCol = bandColor(recruit);
+  const dCol = develop!=null ? bandColor(develop) : '#4a6070';
+
+  const retainNum = document.getElementById('pillar-retain-num');
+  retainNum.textContent = Math.round(retain*10)/10;
+  retainNum.style.color = rCol;
+
+  const recruitNum = document.getElementById('pillar-recruit-num');
+  recruitNum.textContent = Math.round(recruit*10)/10;
+  recruitNum.style.color = rcCol;
+
+  const developNum = document.getElementById('pillar-develop-num');
+  developNum.textContent = develop!=null ? Math.round(develop*10)/10 : '—';
+  developNum.style.color = dCol;
+
   const rB=bandFor(retain),rcB=bandFor(recruit),dB=bandFor(develop||0);
   document.getElementById('pillar-retain-band').className='pillar-score-band '+rB.cls;
   document.getElementById('pillar-retain-band').textContent=rB.label;
