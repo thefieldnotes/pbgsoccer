@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBG Predators — Club Health</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-size:13px;min-height:100vh}
+
+/* ── APP SHELL (PIN / NAV) — matches performance.html / index.html exactly ── */
+#pin-screen{position:fixed;inset:0;background:#0A1728;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:32px 24px}
+.pin-logo-wrap{width:72px;height:72px;border-radius:50%;border:2px solid #2E6BAD;background:#0D1F3C;display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 0 28px rgba(46,107,173,.4);overflow:hidden}
+.pin-logo-wrap img{width:100%;height:100%;object-fit:cover}
+.pin-h{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:3px;text-align:center}
+.pin-sub{font-size:9px;color:#5B9BD5;margin-bottom:26px;text-align:center;font-family:'Montserrat',sans-serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.pin-field{width:100%;max-width:280px;background:#0D1F3C;border:2px solid #1a3a5a;border-radius:2px;color:#fff;font-size:24px;font-weight:700;letter-spacing:12px;padding:12px 16px;text-align:center;outline:none;-webkit-text-security:disc;margin-bottom:10px;font-family:'Montserrat',sans-serif}
+.pin-field:focus{border-color:#2E6BAD}
+.pin-field.shake{animation:shake .35s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+.pin-go{width:100%;max-width:280px;background:#2E6BAD;color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:none;border-radius:2px;padding:12px;font-family:'Montserrat',sans-serif;cursor:pointer}
+.pin-go:hover{background:#5B9BD5}
+.pin-msg{min-height:18px;margin-top:8px;font-size:12px;color:#C0392B;text-align:center}
+
+.nav{background:#06101E;border-bottom:1px solid #1a2f4a;padding:0 28px;display:flex;align-items:center;height:54px;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px;margin-right:36px;flex-shrink:0}
+.nav-badge{width:34px;height:34px;border-radius:50%;border:1.5px solid #2E6BAD;overflow:hidden;flex-shrink:0}
+.nav-badge img{width:100%;height:100%;object-fit:cover}
+.nav-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:#fff;text-transform:uppercase;line-height:1.3;white-space:nowrap}
+.nav-title span{color:#5B9BD5;display:block;font-size:9px;font-weight:500;letter-spacing:.07em;margin-top:1px}
+.nav-links{display:flex;align-items:stretch;flex:1}
+.nav-link{padding:0 18px;display:flex;align-items:center;font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#4a7a9b;border-bottom:2px solid transparent;height:54px;text-decoration:none;transition:color .15s;white-space:nowrap}
+.nav-link:hover{color:#fff}
+.nav-link.active{color:#fff;border-bottom-color:#2E6BAD}
+.nav-link.soon{color:#2a4a62;pointer-events:none}
+.nav-link.soon .soon-tag{font-size:7px;background:#0D2035;color:#2E6BAD;padding:1px 5px;border-radius:2px;margin-left:6px;letter-spacing:.04em;border:1px solid #1a3a5a;vertical-align:middle}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.nav-role-badge{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:2px}
+.nav-role-editor{background:#3D1F00;color:#FEB95A;border:1px solid #7C3D00}
+.nav-role-viewer{background:#0D1F3C;color:#5B9BD5;border:1px solid #2E6BAD}
+.nav-signout-btn{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#2a4a62;cursor:pointer;padding:5px 10px;border:1px solid #1a3050;border-radius:2px;background:transparent;transition:all .15s}
+.nav-signout-btn:hover{color:#fff;border-color:#2E6BAD}
+.nav-mobile-menu{display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-left:8px}
+.nav-mobile-menu::-webkit-scrollbar{display:none}
+.nav-mobile-link{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#4a7a9b;white-space:nowrap;padding:4px 10px;border:1px solid #1a2f4a;border-radius:2px;text-decoration:none;flex-shrink:0}
+.nav-mobile-link.active{color:#fff;border-color:#2E6BAD;background:#0D1F3C}
+
+.page-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:14px;color:#4a7a9b}
+.spinner{width:26px;height:26px;border:3px solid #1a2f4a;border-top-color:#2E6BAD;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+
+/* PAGE TABS */
+.page-tabs{background:#06101E;border-bottom:1px solid #1a2f4a;padding:0 28px;display:flex;gap:0}
+.page-tab{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:12px 20px;color:#4a7a9b;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none}
+.page-tab.active{color:#fff;border-bottom-color:#2E6BAD}
+.page-tab:hover{color:#fff}
+
+.page{max-width:1000px;margin:0 auto;padding:20px 24px 56px}
+.page-view{display:none}
+.page-view.active{display:block}
+
+.section-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#2a4a62;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:#1a2f4a}
+
+/* CLUB HEALTH SCORE HERO */
+.health-hero{background:#0D1F3C;border:1px solid #1a3a5a;border-top:2px solid #2E6BAD;padding:20px 24px;margin-bottom:20px}
+.health-hero-inner{display:flex;align-items:center;gap:32px;flex-wrap:wrap}
+.score-ring-wrap{flex-shrink:0;text-align:center}
+.score-big{font-family:'Montserrat',sans-serif;font-size:52px;font-weight:700;color:#FEB95A;line-height:1}
+.score-label{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7a5a20;margin-top:4px}
+.score-band-badge{display:inline-block;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 14px;border-radius:2px;background:#2D1A00;color:#FEB95A;border:1px solid #7C4500;margin-top:8px}
+.score-sublabel{font-family:'Montserrat',sans-serif;font-size:9px;color:#4a6070;margin-top:8px;letter-spacing:.05em}
+.health-divider{width:1px;height:80px;background:#1a2f4a;flex-shrink:0}
+.pillar-scores{display:flex;gap:24px;flex:1}
+.pillar-score-item{text-align:center;flex:1}
+.pillar-score-num{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;line-height:1}
+.pillar-score-num.retain{color:#FEB95A}
+.pillar-score-num.recruit{color:#5B9BD5}
+.pillar-score-num.develop{color:#9B7ED5}
+.pillar-score-name{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2a4a62;margin-top:4px}
+.pillar-score-band{font-size:10.5px;margin-top:3px;font-family:'Montserrat',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.pillar-score-band.healthy{color:#4ADE80}
+.pillar-score-band.stable{color:#5B9BD5}
+.pillar-score-band.watch{color:#E67E22}
+.pillar-score-band.atrisk{color:#E74C3C}
+.band-dots{display:flex;justify-content:center;gap:6px;margin-top:12px;flex-wrap:wrap}
+.band-dot{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:10px;border:1px solid}
+.band-dot.healthy{background:#0d2a0d;color:#4ADE80;border-color:#1a6a1a}
+.band-dot.stable{background:#0D1F3C;color:#5B9BD5;border-color:#1a4a7a}
+.band-dot.watch{background:#2D1A00;color:#FEB95A;border-color:#7C4500}
+.band-dot.watch.active{background:#7C4500;color:#fff}
+.band-dot.atrisk{background:#2a0808;color:#E74C3C;border-color:#6a1010}
+.band-dot.atrisk.active{background:#6a1010;color:#fff}
+
+/* KPI STRIP */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.kpi-card{background:#0D1F3C;border:1px solid #1a3a5a;border-top:2px solid #2E6BAD;padding:14px 16px}
+.kpi-card.amber-top{border-top-color:#E67E22}
+.kpi-card.red-top{border-top-color:#C0392B}
+.kpi-card.green-top{border-top-color:#4ADE80}
+.kpi-label{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a4a62;margin-bottom:6px}
+.kpi-value{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:700;color:#fff;line-height:1}
+.kpi-sub{font-size:10.5px;color:#5B9BD5;margin-top:3px}
+.kpi-delta{font-size:10.5px;margin-top:4px}
+.kpi-delta.up{color:#4ADE80}
+.kpi-delta.down{color:#E74C3C}
+.kpi-delta.flat{color:#5B9BD5}
+.kpi-delta.amber{color:#FEB95A}
+.benchmark-line{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:9.5px;color:#2a4a62}
+.bench-val{color:#4a6a82}
+
+/* TREND SECTION */
+.trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.trend-card{background:#0D1F3C;border:1px solid #1a3a5a;padding:16px}
+.trend-title{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;margin-bottom:2px}
+.trend-sub{font-size:10.5px;color:#2a4a62;margin-bottom:12px}
+.chart-wrap{position:relative;height:160px}
+
+/* RISK PANEL */
+.risk-panel{background:#0D1F3C;border:1px solid #1a3a5a;padding:16px 20px;margin-bottom:20px}
+.risk-header{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.risk-header::after{content:'';flex:1;height:1px;background:#1a2f4a}
+.risk-items{display:flex;flex-direction:column;gap:8px}
+.risk-item{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:#0a1520;border-radius:2px}
+.risk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.risk-dot.red{background:#C0392B}
+.risk-dot.amber{background:#E67E22}
+.risk-dot.blue{background:#2E6BAD}
+.risk-text{font-size:12px;color:#8ab0cc;line-height:1.5}
+.risk-text strong{color:#fff;font-weight:600}
+
+/* PROGRAM SELF-SUFFICIENCY */
+.sufficiency-card{background:#0D1F3C;border:1px solid #1a3a5a;border-left:3px solid #7BC67E;padding:14px 18px;margin-bottom:20px}
+.sufficiency-title{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7BC67E;margin-bottom:10px}
+.sufficiency-inner{display:flex;gap:24px;flex-wrap:wrap}
+.sufficiency-stat{text-align:center}
+.suf-num{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:700;color:#fff}
+.suf-label{font-size:9.5px;color:#2a4a62;margin-top:2px}
+.sufficiency-desc{flex:1;min-width:200px;font-size:11.5px;color:#6a9ab2;line-height:1.6}
+.sufficiency-desc strong{color:#a8c87a}
+
+/* METHODOLOGY / FORMULA NOTE */
+.method-note{background:#060f1a;border:1px solid #1a2f4a;border-left:3px solid #5B9BD5;padding:12px 16px;font-size:11px;color:#4a6a82;line-height:1.7;margin-bottom:20px}
+.method-note strong{color:#5B9BD5}
+
+/* PRELIMINARY BANNER (Detailed Analysis — Phase 6 pending) */
+.prelim-banner{background:#1a1200;border:1px solid #4a3000;border-left:3px solid #FEB95A;padding:10px 16px;margin-bottom:20px;font-size:11.5px;color:#d4b878;line-height:1.5}
+.prelim-banner strong{color:#FEB95A}
+
+@media(max-width:700px){
+  .kpi-strip{grid-template-columns:1fr 1fr}
+  .trend-grid{grid-template-columns:1fr}
+  .pillar-scores{gap:12px}
+  .health-hero-inner{gap:20px}
+  .health-divider{display:none}
+  .sufficiency-inner{gap:12px}
+}
+@media(max-width:480px){
+  .kpi-strip{grid-template-columns:1fr}
+  .page{padding:12px 14px 40px}
+  .score-big{font-size:40px}
+}
+</style>
+</head>
+<body>
+
+<div id="pin-screen">
+  <div class="pin-logo-wrap"><img src="pbglogonew.png" alt="PBG Predators"></div>
+  <div class="pin-h">Club Health Dashboard</div>
+  <div class="pin-sub">PBG Predators Soccer</div>
+  <input type="password" class="pin-field" id="pin-field" maxlength="6" placeholder="••••" autocomplete="off" inputmode="numeric">
+  <button class="pin-go" onclick="doPin()">Access Dashboard</button>
+  <div class="pin-msg" id="pin-msg"></div>
+</div>
+
+<div id="app" style="display:none;flex-direction:column;min-height:100vh">
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-badge"><img src="pbglogonew.png" alt="PBG Predators"></div>
+      <div class="nav-title">PBG Predators <span>Board Command Center</span></div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Executive</a>
+      <a class="nav-link" href="governance.html">Governance</a>
+      <a class="nav-link" href="performance.html">Performance</a>
+      <a class="nav-link active" href="club-health.html">Club Health</a>
+      <a class="nav-link soon" href="#">Financial <span class="soon-tag">SOON</span></a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-role-badge" id="nav-role-badge"></span>
+      <button class="nav-signout-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div id="page-loading" class="page-loading">
+    <div class="spinner"></div>
+    <div class="load-txt">Loading Club Health Data…</div>
+  </div>
+
+  <div id="page-content" style="display:none">
+
+    <div class="page-tabs">
+      <button class="page-tab active" onclick="switchPage('summary',event)">Executive Summary</button>
+      <button class="page-tab" onclick="switchPage('detail',event)">Detailed Analysis</button>
+    </div>
+
+    <!-- ══════════════ PAGE 1: EXECUTIVE SUMMARY (LIVE DATA — PHASE 5) ══════════════ -->
+    <div class="page-view active" id="view-summary">
+    <div class="page">
+
+      <div class="section-label">Club Health Score</div>
+      <div class="health-hero">
+        <div class="health-hero-inner">
+          <div class="score-ring-wrap">
+            <div class="score-big" id="hero-composite">—</div>
+            <div class="score-label">out of 100</div>
+            <div class="score-band-badge" id="hero-band-badge">—</div>
+            <div class="score-sublabel" id="hero-sublabel">All 3 pillars · 2025/26</div>
+          </div>
+          <div class="health-divider"></div>
+          <div style="flex:1">
+            <div class="pillar-scores">
+              <div class="pillar-score-item">
+                <div class="pillar-score-num retain" id="pillar-retain-num">—</div>
+                <div class="pillar-score-name">Retain</div>
+                <div class="pillar-score-band" id="pillar-retain-band">—</div>
+                <div style="font-size:9.5px;color:#4a6070;margin-top:4px" id="pillar-retain-sub">—</div>
+              </div>
+              <div class="pillar-score-item">
+                <div class="pillar-score-num recruit" id="pillar-recruit-num">—</div>
+                <div class="pillar-score-name">Recruit</div>
+                <div class="pillar-score-band" id="pillar-recruit-band">—</div>
+                <div style="font-size:9.5px;color:#4a6070;margin-top:4px" id="pillar-recruit-sub">—</div>
+              </div>
+              <div class="pillar-score-item">
+                <div class="pillar-score-num develop" id="pillar-develop-num">—</div>
+                <div class="pillar-score-name">Develop</div>
+                <div class="pillar-score-band" id="pillar-develop-band">—</div>
+                <div style="font-size:9.5px;color:#4a6070;margin-top:4px">Advancement · Win Trend · Width</div>
+              </div>
+            </div>
+            <div class="band-dots" id="band-dots"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Key Metrics · 2025/26</div>
+      <div class="kpi-strip" id="kpi-strip"><!-- injected --></div>
+
+      <div class="section-label">3-Year Trends</div>
+      <div class="trend-grid">
+        <div class="trend-card">
+          <div class="trend-title">Player Retention Rate</div>
+          <div class="trend-sub">demosphere_id match across seasons · remote excluded · benchmark 72%</div>
+          <div class="chart-wrap"><canvas id="retentionChart"></canvas></div>
+        </div>
+        <div class="trend-card">
+          <div class="trend-title">Enrollment &amp; Tryout Pool</div>
+          <div class="trend-sub">Enrolled (non-remote) vs total tryout-pipeline registrants</div>
+          <div class="chart-wrap"><canvas id="enrollChart"></canvas></div>
+        </div>
+        <div class="trend-card">
+          <div class="trend-title">External Acquisition</div>
+          <div class="trend-sub">Enrolled players with a non-PBG previous club on file</div>
+          <div class="chart-wrap"><canvas id="externalChart"></canvas></div>
+        </div>
+        <div class="trend-card">
+          <div class="trend-title">Tryout Conversion Rate</div>
+          <div class="trend-sub">Tryout-pipeline registrants who ended up enrolled</div>
+          <div class="chart-wrap"><canvas id="conversionChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="section-label">Strategic Risk Indicators</div>
+      <div class="risk-panel">
+        <div class="risk-header">Active Risks</div>
+        <div class="risk-items" id="risk-items"><!-- injected --></div>
+      </div>
+
+      <div class="section-label">Program Self-Sufficiency</div>
+      <div class="sufficiency-card">
+        <div class="sufficiency-title">Remote Team Dependency · 2025/26</div>
+        <div class="sufficiency-inner" id="sufficiency-inner"><!-- injected --></div>
+      </div>
+
+      <div class="method-note">
+        <strong>Scoring methodology:</strong> Retain (40% wt) and Recruit (30% wt) bands per design-chat spec, Retain re-anchored to the 72% industry benchmark (board-confirmed). Develop (30% wt) = Advancement Rate (50%) + Win Rate Trend (30%, banded) + Program Width (20%). Coach Retention and Waitlist inputs permanently omitted — not tracked, not planned. Remote-filled teams (whole-team) excluded from Develop scoring; individual remote players excluded from Retain/Recruit numerator and denominator alike. All figures computed live from Supabase on each page load.
+      </div>
+
+    </div>
+    </div><!-- /view-summary -->
+
+    <!-- ══════════════ PAGE 2: DETAILED ANALYSIS (Phase 6 — not yet wired) ══════════════ -->
+    <div class="page-view" id="view-detail">
+    <div class="page">
+      <div class="prelim-banner">
+        <strong>Phase 6 in progress.</strong> The Detailed Analysis tab (Retain / Recruit / Develop drill-downs, birth-year bars, tryout funnel, team depth, tier development trend) is not yet wired to live data and is intentionally left blank rather than show stale mockup numbers. The Executive Summary tab above is fully live.
+      </div>
+    </div>
+    </div><!-- /view-detail -->
+
+  </div><!-- /page-content -->
+</div><!-- /app -->
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+const API='https://ijdfydxxyhsufbrsnmte.supabase.co/functions/v1/pin-gateway';
+const SESSION_KEY='pbg_session_pin';
+const SEASON_2324='c1000000-0000-0000-0000-000000000001';
+const SEASON_2425='c1000000-0000-0000-0000-000000000002';
+const SEASON_2526='c1000000-0000-0000-0000-000000000003';
+const SEASON_NAMES={[SEASON_2324]:'2023/24',[SEASON_2425]:'2024/25',[SEASON_2526]:'2025/26'};
+
+let ST={pin:null,isEditor:false};
+
+// ── SESSION / PIN (identical pattern to other pages) ───────
+(function(){
+  const s=sessionStorage.getItem(SESSION_KEY);
+  if(s==='2847'||s==='1963'){ST.pin=s;ST.isEditor=s==='2847';showApp();loadAll();}
+})();
+document.getElementById('pin-field').addEventListener('keydown',e=>{if(e.key==='Enter')doPin();});
+function doPin(){
+  const v=document.getElementById('pin-field').value.trim();
+  if(v==='2847'||v==='1963'){
+    sessionStorage.setItem(SESSION_KEY,v);ST.pin=v;ST.isEditor=v==='2847';showApp();loadAll();
+  }else{
+    const f=document.getElementById('pin-field');
+    document.getElementById('pin-msg').textContent='Incorrect PIN.';
+    f.classList.add('shake');setTimeout(()=>{f.classList.remove('shake');document.getElementById('pin-msg').textContent='';},1400);
+  }
+}
+function showApp(){
+  document.getElementById('pin-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  const nb=document.getElementById('nav-role-badge');
+  if(nb){nb.textContent=ST.isEditor?'Editor':'Viewer';nb.className='nav-role-badge '+(ST.isEditor?'nav-role-editor':'nav-role-viewer');}
+  buildMobileNav();
+}
+function buildMobileNav(){
+  const pages=[{label:'Executive',href:'index.html'},{label:'Governance',href:'governance.html'},{label:'Performance',href:'performance.html'},{label:'Club Health',href:'club-health.html'},{label:'Financial',href:'#',soon:true}];
+  function apply(){
+    const nl=document.querySelector('.nav-links');if(!nl)return;
+    let strip=document.querySelector('.nav-mobile-menu');
+    if(window.innerWidth<=600){
+      nl.style.display='none';
+      if(!strip){strip=document.createElement('div');strip.className='nav-mobile-menu';
+        strip.innerHTML=pages.map(p=>`<a class="nav-mobile-link${p.href==='club-health.html'?' active':''}${p.soon?' soon':''}" href="${p.href}">${p.label}</a>`).join('');
+        nl.parentNode.insertBefore(strip,nl);}
+    }else{nl.style.display='flex';if(strip)strip.remove();}
+  }
+  apply();window.addEventListener('resize',apply);
+}
+function signOut(){
+  sessionStorage.removeItem(SESSION_KEY);ST.pin=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('pin-screen').style.display='flex';
+  document.getElementById('pin-field').value='';
+}
+
+// ── PAGE TABS ───────────────────────────────────────────────
+function switchPage(id,evt){
+  document.querySelectorAll('.page-view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if(evt&&evt.target)evt.target.classList.add('active');
+}
+
+// ── API ───────────────────────────────────────────────────
+async function apiFetch(r){
+  const res=await fetch(`${API}/${r}`,{headers:{'x-pin':ST.pin}});
+  if(!res.ok)throw new Error(`${r}: ${res.status}`);
+  return res.json();
+}
+
+// ── DATA LOAD ───────────────────────────────────────────────
+let REGS=[],TEAMS=[],ADV=[],TREND=[],WIDTH=[];
+
+async function loadAll(){
+  try{
+    const[regs,teams,adv,trend,width]=await Promise.all([
+      apiFetch('player-registrations'),
+      apiFetch('perf/teams'),
+      apiFetch('develop/advancement'),
+      apiFetch('develop/win-trend'),
+      apiFetch('develop/program-width')
+    ]);
+    REGS=regs||[];TEAMS=teams||[];ADV=adv||[];TREND=trend||[];WIDTH=width||[];
+    document.getElementById('page-loading').style.display='none';
+    document.getElementById('page-content').style.display='block';
+    renderAll();
+  }catch(e){
+    document.getElementById('page-loading').innerHTML=`<div style="text-align:center;color:#4a7a9b"><div style="font-size:28px;margin-bottom:10px">&#9888;</div><div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Could not load data</div><div style="font-size:11px;margin-top:6px;color:#2a4a62">${e.message}</div></div>`;
+  }
+}
+
+// ── RETAIN / RECRUIT RAW METRICS ───────────────────────────
+function enrolledNonRemote(seasonId){
+  return REGS.filter(r=>r.season_id===seasonId && !r.is_tryout_only && !r.is_remote);
+}
+function tryoutOnly(seasonId){
+  return REGS.filter(r=>r.season_id===seasonId && r.is_tryout_only);
+}
+function retentionPct(fromSeason,toSeason){
+  const from=enrolledNonRemote(fromSeason);
+  if(!from.length)return null;
+  const toIds=new Set(enrolledNonRemote(toSeason).map(r=>r.demosphere_id));
+  const retained=from.filter(r=>toIds.has(r.demosphere_id)).length;
+  return {pct:retained/from.length*100, retained, base:from.length};
+}
+function growthPct(fromSeason,toSeason){
+  const fromN=enrolledNonRemote(fromSeason).length;
+  const toN=enrolledNonRemote(toSeason).length;
+  if(!fromN)return null;
+  return {pct:(toN-fromN)/fromN*100, fromN, toN};
+}
+function conversionPct(seasonId){
+  const enrolled=enrolledNonRemote(seasonId).length;
+  const pool=enrolled+tryoutOnly(seasonId).length;
+  if(!pool)return null;
+  return {pct:enrolled/pool*100, enrolled, pool};
+}
+function isExternalPrevClub(s){
+  if(!s)return false;
+  const t=s.toLowerCase();
+  if(t.includes('pbg')||t.includes('palm beach')||t.includes('predators')||t.includes('kicks'))return false;
+  return true;
+}
+function externalCount(seasonId){
+  return enrolledNonRemote(seasonId).filter(r=>isExternalPrevClub(r.previous_club_raw)).length;
+}
+
+// ── RETAIN SCORE (bands re-anchored to 72% benchmark, board-confirmed) ──
+// >=72:[90,100]  62-72:[70,89]  52-62:[50,69]  42-52:[30,49]  <42:[0,29] (floor extrapolated at 32%)
+function retainScore(pct){
+  const bands=[
+    {lo:72,hi:200,sLo:90,sHi:100},
+    {lo:62,hi:72, sLo:70,sHi:89},
+    {lo:52,hi:62, sLo:50,sHi:69},
+    {lo:42,hi:52, sLo:30,sHi:49},
+    {lo:32,hi:42, sLo:0, sHi:29}
+  ];
+  if(pct<32)return 0;
+  for(const b of bands){
+    if(pct>=b.lo && pct<b.hi){
+      const pos=Math.min(1,(pct-b.lo)/(b.hi-b.lo));
+      return Math.round(b.sLo+pos*(b.sHi-b.sLo));
+    }
+  }
+  return 100;
+}
+
+// ── RECRUIT SCORE (design-chat bands; floor extrapolated at -10%) ──
+// >10:[90,100]  5-10:[70,89]  0-5:[50,69]  -5-0:[25,49]  <-5:[0,24]
+function recruitPrimaryScore(pct){
+  const bands=[
+    {lo:10, hi:200,sLo:90,sHi:100},
+    {lo:5,  hi:10, sLo:70,sHi:89},
+    {lo:0,  hi:5,  sLo:50,sHi:69},
+    {lo:-5, hi:0,  sLo:25,sHi:49},
+    {lo:-10,hi:-5, sLo:0, sHi:24}
+  ];
+  if(pct<-10)return 0;
+  for(const b of bands){
+    if(pct>=b.lo && pct<b.hi){
+      const pos=Math.min(1,(pct-b.lo)/(b.hi-b.lo));
+      return Math.round(b.sLo+pos*(b.sHi-b.sLo));
+    }
+  }
+  return 100;
+}
+
+// ── DEVELOP SUB-SCORES (from live views — same logic as locked SQL) ──
+function advancementScore(){
+  const rows=ADV.filter(r=>r.curr_season_name==='2025/26' && r.prev_season_name==='2024/25' && r.advancement_status!=null);
+  const n=rows.length;
+  const pts=rows.reduce((s,r)=>s+(r.points||0),0);
+  return {n, score: n? 100*pts/(n*2) : null};
+}
+function winTrendScore(){
+  const totalW=TREND.reduce((s,r)=>s+(r.prior_games||0),0);
+  if(!totalW)return {n:0,avg:null,pts:null};
+  const wSum=TREND.reduce((s,r)=>s+(r.trend_delta||0)*(r.prior_games||0),0);
+  const avg=wSum/totalW;
+  let pts;
+  if(avg>=5)pts=30; else if(avg>=2)pts=22; else if(avg>=-2)pts=14; else if(avg>=-5)pts=7; else pts=2;
+  return {n:TREND.length, avg, pts};
+}
+function programWidthScore(){
+  const n=WIDTH.length;
+  const pts=WIDTH.reduce((s,r)=>s+(r.cohort_points||0),0);
+  return {n, score: n? 20*pts/(4*n) : null};
+}
+
+function bandFor(score){
+  if(score>=80)return{cls:'healthy',label:'Healthy'};
+  if(score>=60)return{cls:'stable',label:'Stable'};
+  if(score>=40)return{cls:'watch',label:'Watch'};
+  return{cls:'atrisk',label:'At Risk'};
+}
+
+// ── RENDER ──────────────────────────────────────────────────
+function renderAll(){
+  const ret2425to2526=retentionPct(SEASON_2425,SEASON_2526);
+  const ret2324to2425=retentionPct(SEASON_2324,SEASON_2425);
+  const grow2425to2526=growthPct(SEASON_2425,SEASON_2526);
+  const grow2324to2425=growthPct(SEASON_2324,SEASON_2425);
+  const conv2526=conversionPct(SEASON_2526);
+  const conv2425=conversionPct(SEASON_2425);
+  const conv2324=conversionPct(SEASON_2324);
+
+  // RETAIN
+  const rPct=ret2425to2526?ret2425to2526.pct:0;
+  const rPrimary=retainScore(rPct);
+  const rTrendDown = ret2324to2425 ? (rPct < ret2324to2425.pct) : false;
+  const retain=Math.max(0,Math.min(100, rPrimary + (rTrendDown?-3:0)));
+
+  // RECRUIT
+  const gPct=grow2425to2526?grow2425to2526.pct:0;
+  let recruit=recruitPrimaryScore(gPct);
+  const convDown = (conv2526&&conv2425) ? (conv2526.pct < conv2425.pct) : false;
+  const convUp = (conv2526&&conv2425) ? (conv2526.pct > conv2425.pct) : false;
+  recruit = Math.max(0,Math.min(100, recruit + (convDown?-5:convUp?5:0)));
+
+  // DEVELOP
+  const adv=advancementScore(), wt=winTrendScore(), pw=programWidthScore();
+  const develop = (adv.score!=null && wt.pts!=null && pw.score!=null) ? (adv.score*0.5 + wt.pts + pw.score) : null;
+
+  const composite = develop!=null ? (retain*0.40 + recruit*0.30 + develop*0.30) : null;
+
+  // HERO
+  document.getElementById('hero-composite').textContent = composite!=null? Math.round(composite*10)/10 : '—';
+  const cBand=bandFor(composite||0);
+  document.getElementById('hero-band-badge').textContent='⬥ '+cBand.label;
+  document.getElementById('pillar-retain-num').textContent=Math.round(retain*10)/10;
+  document.getElementById('pillar-recruit-num').textContent=Math.round(recruit*10)/10;
+  document.getElementById('pillar-develop-num').textContent=develop!=null?Math.round(develop*10)/10:'—';
+  const rB=bandFor(retain),rcB=bandFor(recruit),dB=bandFor(develop||0);
+  document.getElementById('pillar-retain-band').className='pillar-score-band '+rB.cls;
+  document.getElementById('pillar-retain-band').textContent=rB.label;
+  document.getElementById('pillar-recruit-band').className='pillar-score-band '+rcB.cls;
+  document.getElementById('pillar-recruit-band').textContent=rcB.label;
+  document.getElementById('pillar-develop-band').className='pillar-score-band '+dB.cls;
+  document.getElementById('pillar-develop-band').textContent=dB.label;
+  document.getElementById('pillar-retain-sub').innerHTML=`${rPct.toFixed(1)}% retention<br>Benchmark: 72%`;
+  document.getElementById('pillar-recruit-sub').innerHTML=`${gPct>=0?'+':''}${gPct.toFixed(1)}% net growth<br>Conversion ${convDown?'declining':convUp?'improving':'flat'}`;
+
+  const dots=[['healthy','80–100 Healthy'],['stable','60–79 Stable'],['watch','40–59 Watch'],['atrisk','0–39 At Risk']];
+  document.getElementById('band-dots').innerHTML=dots.map(([cls,label])=>{
+    const active=cBand.cls===cls;
+    return `<div class="band-dot ${cls}${active?' active':''}">● ${label}${active?' ◄':''}</div>`;
+  }).join('');
+
+  // KPI STRIP
+  const enrolled2526=enrolledNonRemote(SEASON_2526).length;
+  const enrolled2425=enrolledNonRemote(SEASON_2425).length;
+  const enrolledDelta=enrolled2526-enrolled2425;
+  const kpis=[
+    {label:'PBG Enrolled Players',value:enrolled2526,sub:'Excl. remote-team players',
+      delta:`${enrolledDelta>=0?'↑ +':'↓ '}${enrolledDelta} vs 2024/25`, deltaCls:enrolledDelta>=0?'up':'down', top:'amber-top'},
+    {label:'Player Retention',value:rPct.toFixed(1)+'%',sub:'demosphere_id match · remote excluded',
+      delta:ret2324to2425?`${(rPct-ret2324to2425.pct)>=0?'↑ +':'↓ '}${(rPct-ret2324to2425.pct).toFixed(1)}pts vs prior pair`:'—',
+      deltaCls:ret2324to2425&&(rPct-ret2324to2425.pct)>=0?'up':'down', bench:'72%', top:'amber-top'},
+    {label:'Net Player Growth',value:(gPct>=0?'+':'')+gPct.toFixed(1)+'%',sub:`${enrolled2526} enrolled (non-remote)`,
+      delta: grow2324to2425? `${gPct>=grow2324to2425.pct?'↑':'↓'} ${grow2324to2425.pct.toFixed(1)}% prior year` : '—',
+      deltaCls: gPct<0?'down':'up', bench:'5–10%', top: gPct<0?'red-top':'green-top'},
+    {label:'Tryout Conversion',value:conv2526?conv2526.pct.toFixed(1)+'%':'—', sub:'of tryout-pipeline registrants',
+      delta: convDown?'↓ Declining vs prior season':convUp?'↑ Improving vs prior season':'— Flat',
+      deltaCls: convDown?'down':convUp?'up':'flat', bench:'60%+', top:'amber-top'}
+  ];
+  document.getElementById('kpi-strip').innerHTML=kpis.map(k=>`
+    <div class="kpi-card ${k.top||''}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+      <div class="kpi-delta ${k.deltaCls}">${k.delta}</div>
+      ${k.bench?`<div class="benchmark-line">Benchmark: <span class="bench-val">${k.bench}</span></div>`:''}
+    </div>`).join('');
+
+  // RISK PANEL
+  const risks=[];
+  risks.push({dot:'red',html:`<strong>Retention below the 72% benchmark.</strong> At ${rPct.toFixed(1)}%, PBG is ${(72-rPct).toFixed(1)}pts below benchmark${ret2324to2425&&(rPct>ret2324to2425.pct)?' — improving, but the gap remains the central Retain risk.':'.'}`});
+  if(gPct<0){
+    risks.push({dot:'red',html:`<strong>Enrollment is declining, not growing.</strong> Net player growth is ${gPct.toFixed(1)}% this season (${enrolled2425}→${enrolled2526} enrolled, remote excluded)${grow2324to2425&&grow2324to2425.pct<0?`, following ${grow2324to2425.pct.toFixed(1)}% the prior season — two straight years of decline.`:'.'}`});
+  }
+  if(convDown){
+    risks.push({dot:'amber',html:`<strong>Tryout conversion declining.</strong> ${conv2526.pct.toFixed(1)}% this season vs ${conv2425.pct.toFixed(1)}% prior${conv2324?` (${conv2324.pct.toFixed(1)}% two seasons ago)`:''} — fewer tryout registrants are converting to enrolled players.`});
+  }
+  const remote2526=REGS.filter(r=>r.season_id===SEASON_2526 && r.is_remote).length;
+  const excludedTeams=TEAMS.filter(t=>t.exclude===true).length;
+  risks.push({dot:'amber',html:`<strong>Remote-team dependency.</strong> ${remote2526} players this season are on whole-team-remote rosters (${excludedTeams} teams excluded from competitive scoring) — see Program Self-Sufficiency below.`});
+  if(develop!=null){
+    risks.push({dot:'blue',html:`<strong>Develop pillar in Watch band (${develop.toFixed(1)}/100).</strong> Win Rate Trend scored ${wt.pts}/30 (weighted aggregate ${wt.avg!=null?(wt.avg>=0?'+':'')+wt.avg.toFixed(2):'—'}) after excluding whole-team-remote rosters from competitive results.`});
+  }
+  document.getElementById('risk-items').innerHTML=risks.map(r=>`
+    <div class="risk-item"><div class="risk-dot ${r.dot}"></div><div class="risk-text">${r.html}</div></div>`).join('');
+
+  // SUFFICIENCY CARD
+  const remoteByTier={DPL:0,GA:0,Other:0};
+  REGS.filter(r=>r.season_id===SEASON_2526 && r.is_remote).forEach(r=>{
+    const t=r.canonical_team_id ? TEAMS.find(tm=>tm.id===r.canonical_team_id) : null;
+    const tier=t?t.program_tier:null;
+    if(tier==='DPL')remoteByTier.DPL++; else if(tier==='GA')remoteByTier.GA++; else remoteByTier.Other++;
+  });
+  document.getElementById('sufficiency-inner').innerHTML=`
+    <div class="sufficiency-stat"><div class="suf-num">${remote2526}</div><div class="suf-label">Remote players</div></div>
+    <div class="sufficiency-stat"><div class="suf-num">${remoteByTier.DPL}</div><div class="suf-label">DPL (linked)</div></div>
+    <div class="sufficiency-stat"><div class="suf-num">${excludedTeams}</div><div class="suf-label">Teams excluded</div></div>
+    <div class="sufficiency-desc">
+      <strong>PBG could not field these teams independently in 2025/26.</strong>
+      ${excludedTeams} Girls DPL teams (2007–2013 birth years) are entirely remote-sourced — zero organic
+      PBG registrations found for DPL at any of those ages. Girls GA teams remain organically rostered with
+      only incidental remote supplementation. Remote players are excluded from every Club Health metric;
+      whole-team-remote rosters are additionally excluded from Develop competitive scoring.
+    </div>`;
+
+  renderCharts(ret2324to2425,ret2425to2526,grow2324to2425,grow2425to2526,conv2324,conv2425,conv2526);
+}
+
+// ── CHARTS ──────────────────────────────────────────────────
+const SEASONS_LABELS=['2023/24','2024/25','2025/26'];
+const chartDefaults={
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:'#4a6a82',font:{family:'Montserrat',size:9},boxWidth:10}},
+           tooltip:{backgroundColor:'#0a1f38',titleColor:'#fff',bodyColor:'#8ab0cc',borderColor:'#1a3a5a',borderWidth:1}},
+  scales:{x:{ticks:{color:'#2a4a62',font:{family:'Montserrat',size:9}},grid:{color:'#0d1e32'}},
+          y:{ticks:{color:'#2a4a62',font:{family:'Montserrat',size:9}},grid:{color:'#0d1e32'}}}
+};
+let chartInstances={};
+function renderCharts(ret1,ret2,grow1,grow2,conv1,conv2,conv3){
+  Object.values(chartInstances).forEach(c=>c.destroy());
+
+  chartInstances.retention=new Chart(document.getElementById('retentionChart'),{
+    type:'line',
+    data:{labels:SEASONS_LABELS,datasets:[
+      {label:'PBG Retention',data:[null, ret1?ret1.pct:null, ret2?ret2.pct:null],borderColor:'#2E6BAD',backgroundColor:'rgba(46,107,173,0.1)',fill:true,tension:.3,pointRadius:4,borderWidth:2},
+      {label:'Industry Benchmark (72%)',data:[72,72,72],borderColor:'#E67E22',borderDash:[6,4],borderWidth:1.5,pointRadius:0}
+    ]},
+    options:{...chartDefaults,scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,min:30,max:85,ticks:{...chartDefaults.scales.y.ticks,callback:v=>v+'%'}}}}
+  });
+
+  const e1=enrolledNonRemote(SEASON_2324).length, e2=enrolledNonRemote(SEASON_2425).length, e3=enrolledNonRemote(SEASON_2526).length;
+  const p1=e1+tryoutOnly(SEASON_2324).length, p2=e2+tryoutOnly(SEASON_2425).length, p3=e3+tryoutOnly(SEASON_2526).length;
+  chartInstances.enroll=new Chart(document.getElementById('enrollChart'),{
+    type:'bar',
+    data:{labels:SEASONS_LABELS,datasets:[
+      {label:'Enrolled (non-remote)',data:[e1,e2,e3],backgroundColor:['#1a4a7a','#1a4a7a','#2E6BAD'],borderRadius:2},
+      {label:'Tryout-Pipeline Pool',data:[p1,p2,p3],backgroundColor:'rgba(91,155,213,0.15)',borderColor:'#5B9BD5',borderWidth:1.5,borderRadius:2}
+    ]},
+    options:{...chartDefaults}
+  });
+
+  const x1=externalCount(SEASON_2324), x2=externalCount(SEASON_2425), x3=externalCount(SEASON_2526);
+  chartInstances.external=new Chart(document.getElementById('externalChart'),{
+    type:'bar',
+    data:{labels:SEASONS_LABELS,datasets:[{label:'External Acquisitions',data:[x1,x2,x3],backgroundColor:['#1a4a2a','#1a5a30','#4ADE80'],borderRadius:2}]},
+    options:{...chartDefaults}
+  });
+
+  chartInstances.conversion=new Chart(document.getElementById('conversionChart'),{
+    type:'line',
+    data:{labels:SEASONS_LABELS,datasets:[
+      {label:'Conversion Rate',data:[conv1?conv1.pct:null,conv2?conv2.pct:null,conv3?conv3.pct:null],borderColor:'#FEB95A',backgroundColor:'rgba(254,185,90,0.1)',fill:true,tension:.3,pointRadius:4,borderWidth:2},
+      {label:'Target (60%)',data:[60,60,60],borderColor:'#4ADE80',borderDash:[6,4],borderWidth:1.5,pointRadius:0}
+    ]},
+    options:{...chartDefaults,scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,min:40,max:75,ticks:{...chartDefaults.scales.y.ticks,callback:v=>v+'%'}}}}
+  });
+}
+</script>
+</body>
+</html>

@@ -154,6 +154,7 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
       <a class="nav-link" href="index.html">Executive</a>
       <a class="nav-link" href="governance.html">Governance</a>
       <a class="nav-link active" href="performance.html">Performance</a>
+      <a class="nav-link" href="club-health.html">Club Health</a>
       <a class="nav-link soon" href="#">Financial <span class="soon-tag">SOON</span></a>
     </div>
     <div class="nav-right">
@@ -446,7 +447,7 @@ function goTeam(id){window.location.href=`team-detail.html?team=${id}`;}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function buildMobileNav(){
-  const pages=[{label:'Executive',href:'index.html'},{label:'Governance',href:'governance.html'},{label:'Performance',href:'performance.html'},{label:'Financial',href:'#',soon:true}];
+  const pages=[{label:'Executive',href:'index.html'},{label:'Governance',href:'governance.html'},{label:'Performance',href:'performance.html'},{label:'Club Health',href:'club-health.html'},{label:'Financial',href:'#',soon:true}];
   function apply(){
     const nl=document.querySelector('.nav-links');if(!nl)return;
     let strip=document.querySelector('.nav-mobile-menu');

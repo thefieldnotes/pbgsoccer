@@ -176,6 +176,7 @@ tbody td.primary{color:var(--text);font-weight:500;}
       <a href="index.html" class="nav-link">Executive</a>
       <a href="governance.html" class="nav-link">Governance</a>
       <a href="performance.html" class="nav-link">Performance</a>
+      <a href="club-health.html" class="nav-link">Club Health</a>
       <a class="nav-link soon" href="#">Financial <span class="soon-tag">SOON</span></a>
       <a href="admin.html" class="nav-link" id="nav-admin-link">Admin</a>
     </div>
@@ -841,6 +842,7 @@ function buildMobileNav(activePage) {
     { label:'Executive', href:'index.html' },
     { label:'Governance', href:'governance.html' },
     { label:'Performance', href:'performance.html' },
+    { label:'Club Health', href:'club-health.html' },
     { label:'Financial', href:'#', soon:true }
   ];
   function apply() {
@@ -914,8 +916,8 @@ function renderTierMap() {
       '<td style="padding:6px 8px"><span style="background:' + catColor + '22;color:' + catColor + ';padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700">' + esc(r.category) + '</span></td>' +
       '<td style="padding:6px 8px;color:var(--text-muted);font-size:11px">' + esc(r.notes || '') + '</td>' +
       '<td style="padding:6px 8px;white-space:nowrap">' +
-        '<button class="btn-sm" onclick="openEditTierRule('' + r.id + '')" style="margin-right:4px">Edit</button>' +
-        (ST.pin === '2847' ? '<button class="btn-sm btn-del" onclick="deleteTierRule('' + r.id + '')">Del</button>' : '') +
+        '<button class="btn-sm" onclick="openEditTierRule(' + r.id + ')" style="margin-right:4px">Edit</button>' +
+        (ST.pin === '2847' ? '<button class="btn-sm btn-del" onclick="deleteTierRule(' + r.id + ')">Del</button>' : '') +
       '</td></tr>';
   });
   html += '</tbody></table>';
