@@ -146,9 +146,127 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
 .method-note{background:#060f1a;border:1px solid #1a2f4a;border-left:3px solid #5B9BD5;padding:12px 16px;font-size:11px;color:#4a6a82;line-height:1.7;margin-bottom:20px}
 .method-note strong{color:#5B9BD5}
 
-/* PRELIMINARY BANNER (Detailed Analysis — Phase 6 pending) */
-.prelim-banner{background:#1a1200;border:1px solid #4a3000;border-left:3px solid #FEB95A;padding:10px 16px;margin-bottom:20px;font-size:11.5px;color:#d4b878;line-height:1.5}
-.prelim-banner strong{color:#FEB95A}
+/* DETAIL SUB-TABS */
+.detail-tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.detail-tab{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:7px 18px;border:1px solid #1a3a5a;background:transparent;color:#4a7a9b;cursor:pointer;border-radius:2px;transition:all .15s}
+.detail-tab.active{background:#0D1F3C;color:#fff;border-color:#2E6BAD}
+.detail-pane{display:none}
+.detail-pane.active{display:block}
+.detail-card{background:#0D1F3C;border:1px solid #1a3a5a;padding:16px 20px;margin-bottom:16px}
+.detail-card-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#fff;margin-bottom:2px;letter-spacing:.03em}
+.detail-card-sub{font-size:10.5px;color:#2a4a62;margin-bottom:14px}
+.benchmark-note{display:flex;align-items:center;gap:6px;font-size:10px;color:#2a4a62;margin-bottom:10px}
+.bench-line{width:24px;height:2px;background:#E67E22;border-radius:1px;flex-shrink:0}
+
+/* BIRTH YEAR BARS */
+.by-grid{display:flex;flex-direction:column;gap:6px}
+.by-row{display:flex;align-items:center;gap:8px}
+.by-label{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;color:#8ab0cc;width:40px;text-align:right;flex-shrink:0}
+.by-age{font-size:9.5px;color:#2a4a62;width:26px;flex-shrink:0}
+.by-bar-track{flex:1;height:18px;background:#0a1520;border-radius:2px;position:relative;overflow:visible}
+.by-bar{height:100%;border-radius:2px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;position:relative}
+.by-bar.bar-green{background:#1a6a2a}
+.by-bar.bar-blue{background:#1a4a7a}
+.by-bar.bar-amber{background:#7C4500}
+.by-bar.bar-red{background:#6a1010}
+.by-pct{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap}
+.by-benchmark{position:absolute;top:0;bottom:0;width:2px;background:#E67E22;opacity:.8}
+.by-tag{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:2px;white-space:nowrap;flex-shrink:0}
+.by-tag.risk{background:#6a1010;color:#fca5a5}
+.by-tag.aging{background:#2a2a00;color:#fde68a}
+
+/* GENDER GRID */
+.gender-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.gender-card{background:#0D1F3C;border:1px solid #1a3a5a;padding:14px 16px}
+.gender-title{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.gender-title.male{color:#5B9BD5}
+.gender-title.female{color:#9B7ED5}
+.gender-stat{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #0a1520}
+.gender-stat:last-child{border-bottom:none}
+.gs-label{font-size:11px;color:#5a8099}
+.gs-val{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:#fff}
+
+/* TRYOUT FUNNEL */
+.funnel-wrap{display:flex;flex-direction:column;gap:2px;margin-bottom:0}
+.funnel-step{width:100%}
+.funnel-bar{background:#1a3a5a;border-radius:2px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.funnel-bar.f1{width:100%}
+.funnel-bar.f2{width:82%;background:#1a3050}
+.funnel-bar.f3{width:62%;background:#1a2840}
+.funnel-label{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;color:#fff}
+.funnel-sub{font-size:10px;color:#4a6a82;margin-top:1px}
+.funnel-num{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700;color:#5B9BD5}
+.funnel-arrow{text-align:left;color:#2a4a62;font-size:12px;padding:3px 0 3px 12px;font-size:10px}
+
+/* CONVERSION TREND MINI */
+.conv-trend{display:flex;align-items:flex-end;gap:8px;height:80px;margin-top:4px}
+.conv-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.conv-bar-track{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.conv-bar{width:70%;border-radius:2px 2px 0 0;min-height:4px}
+.conv-season{font-family:'Montserrat',sans-serif;font-size:9px;color:#2a4a62}
+.conv-val{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700}
+.conv-interp{flex:2;display:flex;align-items:center;padding-left:16px;font-size:11px;color:#4a6a82;line-height:1.6;border-left:1px solid #1a2f4a}
+
+/* EXCLUDE NOTE */
+.exclude-note{font-size:10.5px;color:#3a5a72;line-height:1.6;margin-bottom:16px;padding:10px 14px;background:#080f18;border:1px solid #1a2f4a;border-radius:2px}
+.exclude-note strong{color:#5a7a92}
+.exclude-note code{font-family:monospace;font-size:10px;color:#5B9BD5;background:#0D1F3C;padding:1px 4px;border-radius:2px}
+
+/* TEAM DEPTH */
+.depth-grid{display:flex;flex-direction:column;gap:6px}
+.depth-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.depth-label{font-size:10px;font-family:'Montserrat',sans-serif;color:#8ab0cc;width:90px;flex-shrink:0}
+.depth-dots{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.team-dot{width:18px;height:18px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:'Montserrat',sans-serif;flex-shrink:0;cursor:default}
+.team-dot.tier-top{background:#1a4a7a;color:#5B9BD5}
+.team-dot.tier-mid{background:#1a4a2a;color:#4ADE80}
+.team-dot.tier-low{background:#3a2a00;color:#FEB95A}
+.team-dot.empty{background:#0a1520;color:#2a4a62;border:1px dashed #1a2f4a}
+.depth-target-line{width:2px;height:22px;background:#5B9BD5;opacity:.5;margin-left:2px;flex-shrink:0}
+.depth-players{font-size:9.5px;color:#2a4a62}
+.depth-flag{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:2px;flex-shrink:0}
+.depth-flag.under{background:#6a1010;color:#fca5a5}
+.depth-flag.target{background:#0d2a0d;color:#4ADE80}
+.depth-flag.fragmented{background:#3a2a00;color:#FEB95A}
+.depth-flag.thin{background:#2a2000;color:#d4a030}
+
+/* TIER TREND PANEL */
+.tier-panel-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.tier-tabs{display:flex;gap:4px}
+.tier-tab{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:6px 14px;border:1px solid #1a3a5a;background:transparent;color:#4a7a9b;cursor:pointer;border-radius:2px;transition:all .15s}
+.tier-tab.active{background:#0a1f38;color:#fff;border-color:#2E6BAD}
+.tier-tab.is-top.active{border-color:#9B7ED5}
+.metric-toggle{display:flex;gap:3px}
+.metric-btn{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:600;padding:5px 11px;border:1px solid #1a3050;background:transparent;color:#3a6078;cursor:pointer;letter-spacing:.04em;border-radius:2px;transition:all .15s}
+.metric-btn.active{background:#0a1f38;color:#5B9BD5;border-color:#2E6BAD}
+.era-group{margin-bottom:14px}
+.era-group-label{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.era-group-tag{font-family:'Montserrat',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:2px}
+.era-group-tag.platform{background:#0D2035;color:#5B9BD5;border:1px solid #1a4a7a}
+.era-group-tag.academy{background:#2D1A00;color:#FEB95A;border:1px solid #7C3D00}
+.era-group-rule{flex:1;height:1px;background:#1a2f4a}
+.tier-improve-grid{display:flex;flex-direction:column;gap:8px}
+.tier-improve-row{background:#0a1520;border-radius:2px;padding:8px 12px}
+.ti-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.ti-name{font-size:11px;font-weight:600;color:#8ab0cc}
+.ti-trend{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700}
+.ti-trend.up{color:#4ADE80}
+.ti-trend.down{color:#E74C3C}
+.ti-trend.flat{color:#5B9BD5}
+.ti-bars{display:flex;align-items:flex-end;gap:4px;height:28px}
+.ti-bar{flex:1;border-radius:1px 1px 0 0;min-height:3px}
+.ti-seasons{display:flex;justify-content:space-between;margin-top:3px}
+.ti-season{font-size:8.5px;color:#2a4a62;flex:1;text-align:center}
+.ti-val{font-size:8.5px;color:#4a6a82;flex:1;text-align:center;font-weight:600}
+.empty-state-row{background:#080f18;border:1px dashed #1a2f4a;border-radius:2px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.empty-state-text{font-size:10.5px;color:#3a5a72;line-height:1.5}
+.empty-state-text strong{color:#5a7a92}
+.method-callout{background:#060f1a;border:1px solid #1a2f4a;border-left:3px solid #5B9BD5;padding:14px 18px;margin-top:14px}
+.method-callout-title{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5B9BD5;margin-bottom:10px}
+.method-example{font-size:11px;color:#6a9ab2;line-height:1.6;margin-bottom:10px;padding-left:14px;border-left:2px solid #1a3a5a}
+.method-example:last-child{margin-bottom:0}
+.method-example strong{color:#a8c8dc}
+@media(max-width:700px){.gender-grid{grid-template-columns:1fr}.depth-row{gap:6px}}
 
 @media(max-width:700px){
   .kpi-strip{grid-template-columns:1fr 1fr}
@@ -296,10 +414,118 @@ body{font-family:'Source Sans 3',sans-serif;background:#0A1728;color:#fff;font-s
     <!-- ══════════════ PAGE 2: DETAILED ANALYSIS (Phase 6 — not yet wired) ══════════════ -->
     <div class="page-view" id="view-detail">
     <div class="page">
-      <div class="prelim-banner">
-        <strong>Phase 6 in progress.</strong> The Detailed Analysis tab (Retain / Recruit / Develop drill-downs, birth-year bars, tryout funnel, team depth, tier development trend) is not yet wired to live data and is intentionally left blank rather than show stale mockup numbers. The Executive Summary tab above is fully live.
+
+      <div class="detail-tabs">
+        <button class="detail-tab active" onclick="switchDetail('retain',event)">Retain</button>
+        <button class="detail-tab" onclick="switchDetail('recruit',event)">Recruit</button>
+        <button class="detail-tab" onclick="switchDetail('develop',event)">Develop</button>
       </div>
-    </div>
+
+      <!-- ══ RETAIN TAB ══ -->
+      <div class="detail-pane active" id="detail-retain">
+
+        <div class="detail-card">
+          <div class="detail-card-title">Retention by Birth Year · 2024/25 → 2025/26</div>
+          <div class="detail-card-sub">demosphere_id match across consecutive registered player exports · remote excluded · industry benchmark 72%</div>
+          <div class="benchmark-note"><div class="bench-line"></div>Amber line = 72% industry benchmark</div>
+          <div class="by-grid" id="by-retention-chart"></div>
+        </div>
+
+        <div class="gender-grid" id="gender-grid"></div>
+
+        <div class="detail-card">
+          <div class="detail-card-title">Retention Rate · 3-Year Trend</div>
+          <div class="detail-card-sub">Overall · Male · Female · Benchmark 72%</div>
+          <div class="chart-wrap"><canvas id="retentionTrendDetail"></canvas></div>
+        </div>
+
+        <div class="method-note">
+          <strong>Methodology:</strong> Retention = players matched by Demosphere UUID across consecutive season exports.
+          Remote-team players excluded from both numerator and denominator.
+          Birth year 2006 shows near-zero retention by natural program graduation — not attrition.
+        </div>
+
+      </div><!-- /detail-retain -->
+
+      <!-- ══ RECRUIT TAB ══ -->
+      <div class="detail-pane" id="detail-recruit">
+
+        <div class="detail-card">
+          <div class="detail-card-title">Tryout Acquisition Funnel · 2025/26</div>
+          <div class="detail-card-sub">Full pipeline from registrant to enrolled player</div>
+          <div class="funnel-wrap" id="funnel-wrap"></div>
+          <div class="detail-card-sub" style="margin-top:16px;border-top:1px solid #1a2f4a;padding-top:12px">Tryout conversion trend · 3 seasons</div>
+          <div class="conv-trend" id="conv-trend"></div>
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-card-title">External Acquisition</div>
+          <div class="detail-card-sub">Enrolled players with a non-PBG previous club on file · year over year</div>
+          <div class="chart-wrap"><canvas id="externalDetailChart"></canvas></div>
+        </div>
+
+      </div><!-- /detail-recruit -->
+
+      <!-- ══ DEVELOP TAB ══ -->
+      <div class="detail-pane" id="detail-develop">
+
+        <div class="method-note" style="border-left-color:#9B7ED5">
+          <strong style="color:#9B7ED5">Develop methodology:</strong>
+          Scored from competitive match data via three components:
+          Advancement Rate (50% wt) · Win Rate Trend (30% wt, banded) · Program Width (20% wt).
+          Score: <strong id="develop-score-inline" style="color:#fff">58.8/100</strong>.
+          Whole-team-remote rosters excluded from all competitive scoring.
+          Pathway-level metrics (individual player advancement) require GotSport roster export to activate.
+        </div>
+
+        <div class="exclude-note">
+          <strong>Remote-filled teams are excluded club-wide.</strong>
+          Where PBG could not independently field a roster, the team is flagged <code>exclude=true</code>
+          and removed from Team Depth, Tier Development Trend, and all Develop scoring.
+          7 Girls DPL teams (2007–2013) are currently excluded on this basis.
+          This is a manual seasonal review — remote-team status is confirmed via registration data.
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-card-title">Team Depth vs 2-Team Target · 2025/26</div>
+          <div class="detail-card-sub">Each dot = one active canonical team (excluded teams not shown) · Blue marker = 2-team target · Player count from match records</div>
+          <div class="depth-grid" id="depth-chart"></div>
+        </div>
+
+        <div class="detail-card">
+          <div class="tier-panel-header">
+            <div>
+              <div class="detail-card-title">Tier Development Trend</div>
+              <div class="detail-card-sub" style="margin-bottom:0">3-season win% trajectory by team · Platform and Academy shown separately</div>
+            </div>
+            <div class="metric-toggle">
+              <button class="metric-btn active" id="metric-win" onclick="setTierMetric('win',event)">Win%</button>
+            </div>
+          </div>
+          <div class="tier-tabs" style="margin-bottom:14px">
+            <button class="tier-tab active" id="tab-nontop" onclick="setTierTab('nontop',event)">Non-Top Tier</button>
+            <button class="tier-tab is-top" id="tab-top" onclick="setTierTab('top',event)">Top Tier</button>
+          </div>
+          <div id="tier-panel-body"></div>
+          <div class="method-callout">
+            <div class="method-callout-title">How Top Tier Is Assigned</div>
+            <div class="method-example">
+              <strong>Assignment is dynamic, not fixed to a league name.</strong>
+              Top Tier is computed per birth year, per season — whichever tier a cohort actually fielded
+              that season with the highest global rank becomes their Top Tier. A cohort that fielded ECNL
+              in prior seasons but not in 2025/26 will have their next-highest tier become Top Tier automatically.
+            </div>
+            <div class="method-example">
+              <strong>Rank reflects competitive level, not in-season performance.</strong>
+              A non-top-tier team posting a high win rate does not elevate it above a top-tier team
+              on the competitive ordinal — rank is structural, not performance-based.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /detail-develop -->
+
+    </div><!-- /page -->
     </div><!-- /view-detail -->
 
   </div><!-- /page-content -->
@@ -368,6 +594,18 @@ function switchPage(id,evt){
   if(evt&&evt.target)evt.target.classList.add('active');
 }
 
+// ── DETAIL SUB-TABS ─────────────────────────────────────────
+function switchDetail(id,evt){
+  document.querySelectorAll('.detail-pane').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.detail-tab').forEach(el=>el.classList.remove('active'));
+  const pane=document.getElementById('detail-'+id);
+  if(pane)pane.classList.add('active');
+  if(evt&&evt.target)evt.target.classList.add('active');
+  // Render chart if switching to retain detail
+  if(id==='retain'&&!chartsInited.retentionTrendDetail) renderRetentionTrendDetail();
+  if(id==='recruit'&&!chartsInited.externalDetail) renderExternalDetailChart();
+}
+
 // ── API ───────────────────────────────────────────────────
 async function apiFetch(r){
   const res=await fetch(`${API}/${r}`,{headers:{'x-pin':ST.pin}});
@@ -376,18 +614,26 @@ async function apiFetch(r){
 }
 
 // ── DATA LOAD ───────────────────────────────────────────────
-let REGS=[],TEAMS=[],ADV=[],TREND=[],WIDTH=[];
+let REGS=[],TEAMS=[],ADV=[],TREND=[],WIDTH=[],TEAM_RESULTS=[],TIER_RANK_MAP=[];
+let currentTierTab='nontop';
 
 async function loadAll(){
   try{
-    const[regs,teams,adv,trend,width]=await Promise.all([
+    const[regs,teams,adv,trend,width,teamResults,trm]=await Promise.all([
       apiFetch('player-registrations'),
       apiFetch('perf/teams'),
       apiFetch('develop/advancement'),
       apiFetch('develop/win-trend'),
-      apiFetch('develop/program-width')
+      apiFetch('develop/program-width'),
+      apiFetch('develop/team-results'),
+      apiFetch('tier-rank-map')
     ]);
     REGS=regs||[];TEAMS=teams||[];ADV=adv||[];TREND=trend||[];WIDTH=width||[];
+    TEAM_RESULTS=teamResults||[];TIER_RANK_MAP=trm||[];
+    // Enrich TEAMS with global_rank from tier_rank_map
+    const rankKey={};
+    TIER_RANK_MAP.forEach(r=>{rankKey[`${r.program_level}|${r.program_side}|${r.tier}`]=r.global_rank;});
+    TEAMS.forEach(t=>{t.global_rank=rankKey[`${t.program_level}|${t.program_side}|${t.program_tier}`]||99;});
     document.getElementById('page-loading').style.display='none';
     document.getElementById('page-content').style.display='block';
     renderAll();
@@ -396,7 +642,388 @@ async function loadAll(){
   }
 }
 
-// ── RETAIN / RECRUIT RAW METRICS ───────────────────────────
+// ── PHASE 6: RETAIN TAB ────────────────────────────────────
+function renderByRetention(){
+  const s2425=enrolledNonRemote(SEASON_2425);
+  const s2526ids=new Set(enrolledNonRemote(SEASON_2526).map(r=>r.demosphere_id));
+  // group by birth year
+  const map={};
+  s2425.forEach(r=>{
+    const yr=r.birth_year;
+    if(!yr)return;
+    if(!map[yr])map[yr]={base:0,retained:0};
+    map[yr].base++;
+    if(s2526ids.has(r.demosphere_id))map[yr].retained++;
+  });
+  const BENCH=72;
+  const years=Object.keys(map).map(Number).sort((a,b)=>b-a);
+  const age=yr=>2026-yr; // approximate U-age for 25/26 season
+  const container=document.getElementById('by-retention-chart');
+  if(!container)return;
+  container.innerHTML=years.map(yr=>{
+    const d=map[yr];
+    if(!d.base)return'';
+    const pct=Math.round(d.retained/d.base*1000)/10;
+    const barW=Math.min(pct,100);
+    const cls=pct>=72?'bar-green':pct>=62?'bar-blue':pct>=50?'bar-amber':'bar-red';
+    let tag='';
+    if(yr<=2007)tag='<span class="by-tag aging">Aging out</span>';
+    else if(pct<50)tag='<span class="by-tag risk">⚠ Low</span>';
+    return `<div class="by-row">
+      <div class="by-label">${yr}</div>
+      <div class="by-age">U${age(yr)}</div>
+      <div class="by-bar-track">
+        <div class="by-bar ${cls}" style="width:${barW}%"><span class="by-pct">${pct}%</span></div>
+        <div class="by-benchmark" style="left:${BENCH}%"></div>
+      </div>
+      ${tag}
+    </div>`;
+  }).join('');
+}
+
+function renderGenderGrid(){
+  const calc=(fromSeason,toSeason,gender)=>{
+    const key=gender==='Male'?'Male':'Female';
+    const from=enrolledNonRemote(fromSeason).filter(r=>r.gender===key);
+    const toIds=new Set(enrolledNonRemote(toSeason).filter(r=>r.gender===key).map(r=>r.demosphere_id));
+    if(!from.length)return null;
+    const retained=from.filter(r=>toIds.has(r.demosphere_id)).length;
+    return Math.round(retained/from.length*1000)/10;
+  };
+  const data=[
+    {gender:'Male',titleCls:'male',
+      v1:calc(SEASON_2324,SEASON_2425,'Male'),
+      v2:calc(SEASON_2425,SEASON_2526,'Male')},
+    {gender:'Female',titleCls:'female',
+      v1:calc(SEASON_2324,SEASON_2425,'Female'),
+      v2:calc(SEASON_2425,SEASON_2526,'Female')}
+  ];
+  const el=document.getElementById('gender-grid');
+  if(!el)return;
+  el.innerHTML=data.map(d=>{
+    const delta=d.v2&&d.v1?Math.round((d.v2-d.v1)*10)/10:null;
+    const vs72=d.v2?Math.round((d.v2-72)*10)/10:null;
+    const deltaCol=delta>=0?'#4ADE80':'#E74C3C';
+    const vsCol=vs72>=0?'#4ADE80':vs72>=-8?'#FEB95A':'#E74C3C';
+    return `<div class="gender-card">
+      <div class="gender-title ${d.titleCls}">${d.gender} Retention</div>
+      <div class="gender-stat"><span class="gs-label">2023/24 → 2024/25</span><span class="gs-val">${d.v1?d.v1+'%':'—'}</span></div>
+      <div class="gender-stat"><span class="gs-label">2024/25 → 2025/26</span><span class="gs-val">${d.v2?d.v2+'%':'—'}</span></div>
+      <div class="gender-stat"><span class="gs-label">Trend</span><span class="gs-val" style="color:${deltaCol}">${delta!=null?(delta>=0?'↑ +':' ↓ ')+delta+'pts':'—'}</span></div>
+      <div class="gender-stat"><span class="gs-label">vs Benchmark (72%)</span><span class="gs-val" style="color:${vsCol}">${vs72!=null?(vs72>=0?'+':'')+vs72+'pts':'—'}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderRetentionTrendDetail(){
+  if(chartsInited.retentionTrendDetail)return;
+  const canvas=document.getElementById('retentionTrendDetail');
+  if(!canvas)return;
+  chartsInited.retentionTrendDetail=true;
+  const calcOverall=(f,t)=>{
+    const from=enrolledNonRemote(f);
+    const toIds=new Set(enrolledNonRemote(t).map(r=>r.demosphere_id));
+    return from.length?Math.round(from.filter(r=>toIds.has(r.demosphere_id)).length/from.length*1000)/10:null;
+  };
+  const calcGender=(f,t,g)=>{
+    const from=enrolledNonRemote(f).filter(r=>r.gender===g);
+    const toIds=new Set(enrolledNonRemote(t).filter(r=>r.gender===g).map(r=>r.demosphere_id));
+    return from.length?Math.round(from.filter(r=>toIds.has(r.demosphere_id)).length/from.length*1000)/10:null;
+  };
+  new Chart(canvas,{type:'line',
+    data:{labels:['23/24→24/25','24/25→25/26'],datasets:[
+      {label:'Overall',data:[calcOverall(SEASON_2324,SEASON_2425),calcOverall(SEASON_2425,SEASON_2526)],borderColor:'#fff',pointRadius:4,borderWidth:2,tension:.3},
+      {label:'Male',data:[calcGender(SEASON_2324,SEASON_2425,'Male'),calcGender(SEASON_2425,SEASON_2526,'Male')],borderColor:'#5B9BD5',pointRadius:4,borderWidth:2,tension:.3},
+      {label:'Female',data:[calcGender(SEASON_2324,SEASON_2425,'Female'),calcGender(SEASON_2425,SEASON_2526,'Female')],borderColor:'#9B7ED5',pointRadius:4,borderWidth:2,tension:.3},
+      {label:'Benchmark (72%)',data:[72,72],borderColor:'#E67E22',borderDash:[6,4],borderWidth:1.5,pointRadius:0}
+    ]},
+    options:{...chartDefaults,scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,min:48,max:80,ticks:{...chartDefaults.scales.y.ticks,callback:v=>v+'%'}}}}
+  });
+}
+
+// ── PHASE 6: RECRUIT TAB ───────────────────────────────────
+function renderFunnel(){
+  const el=document.getElementById('funnel-wrap');
+  if(!el)return;
+  const enrolled=enrolledNonRemote(SEASON_2526).length;
+  const tryout=tryoutOnly(SEASON_2526).length;
+  const total=enrolled+tryout;
+  const external=externalCount(SEASON_2526);
+  const extPct=total?Math.round(external/total*10)/10:0;
+  // New players = enrolled who were not enrolled in 24/25
+  const prev2425ids=new Set(enrolledNonRemote(SEASON_2425).map(r=>r.demosphere_id));
+  const newPlayers=enrolledNonRemote(SEASON_2526).filter(r=>!prev2425ids.has(r.demosphere_id)).length;
+  const prev2324ids=new Set(enrolledNonRemote(SEASON_2324).map(r=>r.demosphere_id));
+  const newPlayers2425=enrolledNonRemote(SEASON_2425).filter(r=>!prev2324ids.has(r.demosphere_id)).length;
+  const convPct=total?Math.round(enrolled/total*1000)/10:0;
+  el.innerHTML=`
+    <div class="funnel-step">
+      <div class="funnel-bar f1">
+        <div><div class="funnel-label">Total Tryout-Pipeline Registrations</div><div class="funnel-sub">All players who registered to try out</div></div>
+        <div class="funnel-num">${total.toLocaleString()}</div>
+      </div>
+    </div>
+    <div class="funnel-arrow">▼ ${external.toLocaleString()} from outside clubs (${extPct}%)</div>
+    <div class="funnel-step">
+      <div class="funnel-bar f2">
+        <div><div class="funnel-label">External Applicants</div><div class="funnel-sub">Previous club on file — primary recruitment signal</div></div>
+        <div class="funnel-num">${external.toLocaleString()}</div>
+      </div>
+    </div>
+    <div class="funnel-arrow">▼ ${enrolled.toLocaleString()} total enrolled (${convPct}%)</div>
+    <div class="funnel-step">
+      <div class="funnel-bar f3">
+        <div><div class="funnel-label">Enrolled Players (New)</div><div class="funnel-sub">Not in prior season · net new to program</div></div>
+        <div>
+          <div class="funnel-num" style="color:#FEB95A">${newPlayers.toLocaleString()}</div>
+          <div style="font-size:9px;color:#FEB95A">${newPlayers>=newPlayers2425?'↑':'↓'} ${newPlayers>=newPlayers2425?'+':''}${newPlayers-newPlayers2425} vs 24/25</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderConvTrend(){
+  const el=document.getElementById('conv-trend');
+  if(!el)return;
+  const convs=[SEASON_2324,SEASON_2425,SEASON_2526].map(s=>{
+    const e=enrolledNonRemote(s).length, t=tryoutOnly(s).length;
+    return e+t?Math.round(e/(e+t)*1000)/10:null;
+  });
+  const labels=['2023/24','2024/25','2025/26'];
+  const maxC=Math.max(...convs.filter(Boolean));
+  const declining=convs[2]&&convs[1]&&convs[2]<convs[1];
+  const bars=convs.map((v,i)=>{
+    const h=v?Math.round((v/maxC)*60):4;
+    const col=i===2?(declining?'#6a2800':'#1a4a7a'):i===1?'#7C4500':'#1a4a7a';
+    const valCol=declining&&i===2?'#FEB95A':i===0?'#5B9BD5':'#FEB95A';
+    return `<div class="conv-col">
+      <div class="conv-bar-track"><div class="conv-bar" style="height:${h}px;background:${col}"></div></div>
+      <div class="conv-val" style="color:${valCol}">${v?v+'%':'—'}</div>
+      <div class="conv-season">${labels[i]}</div>
+    </div>`;
+  }).join('');
+  const interp=declining
+    ?'Conversion has declined for consecutive seasons. External applicant volume is growing — this is not a pipeline problem. Possible causes: capacity constraints, offer timing, or fee sensitivity.'
+    :'Conversion rate is improving. Monitor whether this reflects increased capacity or external applicant mix shift.';
+  el.innerHTML=bars+`<div class="conv-interp">${interp}</div>`;
+}
+
+function renderExternalDetailChart(){
+  if(chartsInited.externalDetail)return;
+  const canvas=document.getElementById('externalDetailChart');
+  if(!canvas)return;
+  chartsInited.externalDetail=true;
+  const x=[SEASON_2324,SEASON_2425,SEASON_2526].map(s=>externalCount(s));
+  const prev2425ids=new Set(enrolledNonRemote(SEASON_2425).map(r=>r.demosphere_id));
+  const prev2324ids=new Set(enrolledNonRemote(SEASON_2324).map(r=>r.demosphere_id));
+  const np2526=enrolledNonRemote(SEASON_2526).filter(r=>!prev2425ids.has(r.demosphere_id)).length;
+  const np2425=enrolledNonRemote(SEASON_2425).filter(r=>!prev2324ids.has(r.demosphere_id)).length;
+  new Chart(canvas,{type:'bar',
+    data:{labels:SEASONS_LABELS,datasets:[
+      {label:'External applicants',data:x,backgroundColor:['#1a4a2a','#1f5a30','#2a8040'],borderRadius:2},
+      {label:'New enrolled players',data:[null,np2425,np2526],backgroundColor:'rgba(74,222,128,0.2)',borderColor:'#4ADE80',borderWidth:1.5,borderRadius:2}
+    ]},
+    options:{...chartDefaults}
+  });
+}
+
+// ── PHASE 6: DEVELOP TAB ───────────────────────────────────
+function renderDepthChart(){
+  const el=document.getElementById('depth-chart');
+  if(!el)return;
+  // Build depth from v_program_width_score (WIDTH) and teams
+  // cohort = birth_year + gender; get teams and their tiers
+  const SEASON_2526_NAME='2025/26';
+  // Build tier lookup from TEAMS
+  const teamById={};
+  TEAMS.forEach(t=>{teamById[t.id]=t;});
+  // Group WIDTH rows by gender/birth_year, already have team_names and classification
+  const rows=WIDTH.map(w=>{
+    const gender=w.gender==='Male'?'Boys':'Girls';
+    const label=`${gender} ${w.birth_year}`;
+    // parse team names to build dots
+    const teamNames=(w.team_names||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const dots=teamNames.map(tn=>{
+      // find team in TEAMS by canonical_name
+      const t=TEAMS.find(tm=>tm.canonical_name===tn&&!tm.exclude);
+      if(!t)return null;
+      // determine tier class by global_rank
+      const trm_rank=TEAMS.filter(tm=>tm.program_level===t.program_level&&tm.program_side===t.program_side&&tm.program_tier===t.program_tier);
+      const cls=t.global_rank===1?'tier-top':t.global_rank===2?'tier-mid':'tier-low';
+      const abbr=t.program_tier?t.program_tier.slice(0,3):t.program_tier;
+      return {cls,abbr:abbr,name:t.program_tier};
+    }).filter(Boolean);
+    const cls=w.classification||'';
+    const flagCls=cls==='Underserved'?'under':cls==='Target'?'target':cls==='Fragmented'?'fragmented':'thin';
+    const flagText=cls==='Underserved'?`${w.team_count} Team — Underserved`:
+                   cls==='Target'?`${w.team_count} Teams ✓`:
+                   cls==='Fragmented'?`${w.team_count} Teams — Thin Rosters`:
+                   `${w.team_count} Teams — Thin Rosters`;
+    return {label, dots, players:w.registered_players||0, est:w.est_avg_roster||0, flagCls, flagText, sortKey:(w.gender==='Male'?0:1)*100+(2020-w.birth_year)};
+  });
+  rows.sort((a,b)=>a.sortKey-b.sortKey);
+  el.innerHTML=rows.map(r=>{
+    const dotHtml=r.dots.map(d=>`<div class="team-dot ${d.cls}" title="${d.name}">${d.abbr}</div>`).join('');
+    const emptyDot=r.dots.length<2?'<div class="team-dot empty">+</div>':'';
+    return `<div class="depth-row">
+      <div class="depth-label">${r.label}</div>
+      <div class="depth-dots">${dotHtml}${emptyDot}<div class="depth-target-line"></div></div>
+      <div class="depth-players">${r.players} players · est. ${parseFloat(r.est).toFixed(0)}/team</div>
+      <div class="depth-flag ${r.flagCls}">${r.flagText}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── TIER DEVELOPMENT TREND ─────────────────────────────────
+function setTierTab(tab,evt){
+  currentTierTab=tab;
+  document.getElementById('tab-nontop').classList.toggle('active',tab==='nontop');
+  document.getElementById('tab-top').classList.toggle('active',tab==='top');
+  renderTierPanel();
+}
+function setTierMetric(metric,evt){}// Win% only for now
+
+function buildTierData(){
+  // Join TEAM_RESULTS with TEAMS to get team metadata
+  // v_team_season_results has: team_id, season_id, games, wins, draws, losses, win_rate_pct
+  // Need season name — derive from season_id constants
+  const seasonName={
+    [SEASON_2324]:'2023/24',[SEASON_2425]:'2024/25',[SEASON_2526]:'2025/26'
+  };
+  const teamMeta={};
+  TEAMS.forEach(t=>{if(!t.exclude)teamMeta[t.id]=t;});
+
+  // Build per-team 3-season win rates
+  const byTeam={};
+  TEAM_RESULTS.forEach(r=>{
+    const t=teamMeta[r.team_id];
+    if(!t)return;
+    const sn=seasonName[r.season_id];
+    if(!sn)return;
+    if(!byTeam[r.team_id])byTeam[r.team_id]={team:t,seasons:{}};
+    byTeam[r.team_id].seasons[sn]=parseFloat(r.win_rate_pct)||0;
+  });
+
+  // Determine top-tier teams per cohort per season
+  // Group by birth_year + program_side, find min global_rank per season
+  const topTierKey={};
+  Object.values(byTeam).forEach(({team,seasons})=>{
+    Object.keys(seasons).forEach(sn=>{
+      const key=`${team.birth_year}|${team.program_side}|${sn}`;
+      if(!topTierKey[key]||team.global_rank<topTierKey[key])topTierKey[key]=team.global_rank;
+    });
+  });
+
+  const topList=[],nonTopList=[];
+  Object.entries(byTeam).forEach(([tid,{team,seasons}])=>{
+    const wins=['2023/24','2024/25','2025/26'].map(sn=>{
+      // Is this team the top tier for this cohort this season?
+      const key=`${team.birth_year}|${team.program_side}|${sn}`;
+      const topRank=topTierKey[key];
+      if(seasons[sn]==null)return null;
+      return seasons[sn];
+    });
+    // Classify as top or non-top based on majority seasons where it appears
+    const seasonsAppeared=Object.keys(seasons);
+    const isTop=seasonsAppeared.some(sn=>{
+      const key=`${team.birth_year}|${team.program_side}|${sn}`;
+      return topTierKey[key]===team.global_rank;
+    });
+    const era=team.program_level==='Platform'?'platform':'academy';
+    const entry={name:team.canonical_name,win:wins,era,birthYear:team.birth_year,side:team.program_side};
+    if(isTop)topList.push(entry); else nonTopList.push(entry);
+  });
+
+  // Sort: platform first, then by birth_year desc, then name
+  const sortFn=(a,b)=>{
+    if(a.era!==b.era)return a.era==='platform'?-1:1;
+    if(b.birthYear!==a.birthYear)return b.birthYear-a.birthYear;
+    return a.name.localeCompare(b.name);
+  };
+  topList.sort(sortFn);nonTopList.sort(sortFn);
+  return {top:topList,nontop:nonTopList};
+}
+
+function renderTierGroup(teams,eraLabel,eraClass){
+  if(!teams||!teams.length)return'';
+  const rows=teams.map(d=>{
+    const vals=d.win;
+    const validVals=vals.filter(v=>v!=null);
+    const maxV=Math.max(...validVals,1);
+    const bars=vals.map(v=>{
+      if(v==null)return`<div class="ti-bar" style="height:4px;background:#0a1520;opacity:.3"></div>`;
+      const h=Math.max(Math.round((v/100)*28),3);
+      const col=v>=60?'#4ADE80':v>=40?'#5B9BD5':'#FEB95A';
+      return`<div class="ti-bar" style="height:${h}px;background:${col}"></div>`;
+    }).join('');
+    const valLabels=vals.map(v=>v==null?'—':Math.round(v)+'%').map(v=>`<div class="ti-val">${v}</div>`).join('');
+    let trendText='—',trendDir='flat';
+    if(validVals.length>=2){
+      const delta=validVals[validVals.length-1]-validVals[0];
+      trendDir=delta>3?'up':delta<-3?'down':'flat';
+      trendText=(delta>=0?'+':'')+Math.round(delta)+'pts';
+    }
+    return`<div class="tier-improve-row">
+      <div class="ti-header"><div class="ti-name">${d.name}</div><div class="ti-trend ${trendDir}">${trendText}</div></div>
+      <div class="ti-bars">${bars}</div>
+      <div class="ti-seasons"><div class="ti-season">23/24</div><div class="ti-season">24/25</div><div class="ti-season">25/26</div></div>
+      <div class="ti-seasons">${valLabels}</div>
+    </div>`;
+  }).join('');
+  // Split by era
+  const platformRows=teams.filter(t=>t.era==='platform');
+  const academyRows=teams.filter(t=>t.era==='academy');
+  let html='';
+  if(platformRows.length){
+    html+=`<div class="era-group"><div class="era-group-label"><span class="era-group-tag platform">Platform</span><span class="era-group-rule"></span></div><div class="tier-improve-grid">${platformRows.map(d=>renderTeamRow(d)).join('')}</div></div>`;
+  }
+  if(academyRows.length){
+    html+=`<div class="era-group"><div class="era-group-label"><span class="era-group-tag academy">Academy</span><span class="era-group-rule"></span></div><div class="tier-improve-grid">${academyRows.map(d=>renderTeamRow(d)).join('')}</div></div>`;
+  }
+  return html;
+}
+
+function renderTeamRow(d){
+  const vals=d.win;
+  const validVals=vals.filter(v=>v!=null);
+  const bars=vals.map(v=>{
+    if(v==null)return`<div class="ti-bar" style="height:4px;background:#0a1520;opacity:.3"></div>`;
+    const h=Math.max(Math.round((v/100)*28),3);
+    const col=v>=60?'#4ADE80':v>=40?'#5B9BD5':'#FEB95A';
+    return`<div class="ti-bar" style="height:${h}px;background:${col}"></div>`;
+  }).join('');
+  const valLabels=vals.map(v=>v==null?'—':Math.round(v)+'%').map(v=>`<div class="ti-val">${v}</div>`).join('');
+  let trendText='—',trendDir='flat';
+  if(validVals.length>=2){
+    const delta=validVals[validVals.length-1]-validVals[0];
+    trendDir=delta>3?'up':delta<-3?'down':'flat';
+    trendText=(delta>=0?'+':'')+Math.round(delta)+'pts';
+  }
+  return`<div class="tier-improve-row">
+    <div class="ti-header"><div class="ti-name">${d.name}</div><div class="ti-trend ${trendDir}">${trendText}</div></div>
+    <div class="ti-bars">${bars}</div>
+    <div class="ti-seasons"><div class="ti-season">23/24</div><div class="ti-season">24/25</div><div class="ti-season">25/26</div></div>
+    <div class="ti-seasons">${valLabels}</div>
+  </div>`;
+}
+
+function renderTierPanel(){
+  const body=document.getElementById('tier-panel-body');
+  if(!body||!TEAM_RESULTS.length)return;
+  const {top,nontop}=buildTierData();
+  const list=currentTierTab==='top'?top:nontop;
+  body.innerHTML=renderTierGroup(list);
+}
+
+// ── PHASE 6 RENDER ALL ─────────────────────────────────────
+function renderPhase6(){
+  renderByRetention();
+  renderGenderGrid();
+  renderFunnel();
+  renderConvTrend();
+  renderDepthChart();
+  renderTierPanel();
+}
 function enrolledNonRemote(seasonId){
   return REGS.filter(r=>r.season_id===seasonId && !r.is_tryout_only && !r.is_remote);
 }
@@ -617,6 +1244,7 @@ function renderAll(){
     </div>`;
 
   renderCharts(ret2324to2425,ret2425to2526,grow2324to2425,grow2425to2526,conv2324,conv2425,conv2526);
+  renderPhase6();
 }
 
 // ── CHARTS ──────────────────────────────────────────────────
