@@ -386,22 +386,28 @@ async function apiFetch(resource) {
 // ── LOAD ALL DATA ─────────────────────────────────────────────
 async function loadAll() {
   try {
-    const [items, meetings, rawConfig, teams, matches] = await Promise.all([
+    const [items, meetings, rawConfig, teams, matches,
+           regs, trm, chAdv, chTrend, chWidth] = await Promise.all([
       apiFetch('items'),
       apiFetch('meetings'),
       apiFetch('config'),
       apiFetch('perf/teams'),
-      apiFetch('perf/matches').catch(() => [])
+      apiFetch('perf/matches').catch(() => []),
+      apiFetch('player-registrations'),
+      apiFetch('tier-rank-map'),
+      apiFetch('develop/advancement'),
+      apiFetch('develop/win-trend'),
+      apiFetch('develop/program-width')
     ]);
 
     // Parse config
     const configMap = {};
     (rawConfig || []).forEach(r => { configMap[r.key] = r.value; });
     const domainCfg = configMap['domain_weights'] || {
-      governance:  { enabled: true,  weight: 25 },
-      competitive: { enabled: true,  weight: 25 },
-      financial:   { enabled: false, weight: 25 },
-      operations:  { enabled: false, weight: 25 }
+      governance:   { enabled: true,  weight: 25 },
+      competitive:  { enabled: true,  weight: 25 },
+      club_health:  { enabled: true,  weight: 25 },
+      financial:    { enabled: false, weight: 25 }
     };
 
     // Build team map
@@ -411,17 +417,18 @@ async function loadAll() {
     // Compute scores
     const govData  = computeGovernance(items || [], meetings || []);
     const compData = computeCompetitive(matches || [], teamMap);
-    const composite = computeComposite(govData.score, compData.score, domainCfg);
+    const chData   = computeClubHealth(regs || [], trm || [], chAdv || [], chTrend || [], chWidth || []);
+    const composite = computeComposite(govData.score, compData.score, chData.composite, domainCfg);
 
     // Render
     document.getElementById('page-loading').style.display = 'none';
     document.getElementById('page-content').style.display = 'block';
 
-    renderHero(govData, compData);
-    renderHealthEngine(govData, compData, domainCfg, composite);
-    renderKPIs(govData, compData);
-    renderIntel(govData, compData);
-    renderRisks(govData, compData);
+    renderHero(govData, compData, chData);
+    renderHealthEngine(govData, compData, chData, domainCfg, composite);
+    renderKPIs(govData, compData, chData);
+    renderIntel(govData, compData, chData);
+    renderRisks(govData, compData, chData);
     renderActionCenter(items || []);
   } catch(e) {
     document.getElementById('page-loading').innerHTML =
@@ -557,17 +564,74 @@ function computeCompetitive(matches, teamMap) {
 }
 
 // ── COMPOSITE SCORE ───────────────────────────────────────────
-function computeComposite(govScore, compScore, cfg) {
+function computeComposite(govScore, compScore, chScore, cfg) {
   const enabled = [];
   let weightSum = 0, composite = 0;
   if (cfg.governance?.enabled && govScore != null) { enabled.push('Governance'); const w=cfg.governance.weight; weightSum+=w; composite+=govScore*w; }
   if (cfg.competitive?.enabled && compScore != null && compScore > 0) { enabled.push('Competitive'); const w=cfg.competitive.weight; weightSum+=w; composite+=compScore*w; }
+  if (cfg.club_health?.enabled && chScore != null) { enabled.push('Club Health'); const w=cfg.club_health.weight; weightSum+=w; composite+=chScore*w; }
   if (!enabled.length || !weightSum) return { score: null, enabled, partial: true };
   return { score: Math.round(composite/weightSum), enabled, partial: enabled.length < 4 };
 }
 
+// ── CLUB HEALTH SCORE ─────────────────────────────────────────
+function computeClubHealth(regs, trmRows, adv, trend, width) {
+  const S2324='c1000000-0000-0000-0000-000000000001';
+  const S2425='c1000000-0000-0000-0000-000000000002';
+  const S2526='c1000000-0000-0000-0000-000000000003';
+  const enrolled=s=>regs.filter(r=>r.season_id===s&&!r.is_tryout_only&&!r.is_remote);
+  const tryoutOnly=s=>regs.filter(r=>r.season_id===s&&r.is_tryout_only);
+
+  // RETAIN
+  const from2425=enrolled(S2425); const to2526ids=new Set(enrolled(S2526).map(r=>r.demosphere_id));
+  const rPct=from2425.length?from2425.filter(r=>to2526ids.has(r.demosphere_id)).length/from2425.length*100:0;
+  const from2324=enrolled(S2324); const to2425ids=new Set(from2425.map(r=>r.demosphere_id));
+  const rPct2=from2324.length?from2324.filter(r=>to2425ids.has(r.demosphere_id)).length/from2324.length*100:0;
+  function retainScore(p){
+    const bands=[{lo:72,hi:200,sLo:90,sHi:100},{lo:62,hi:72,sLo:70,sHi:89},{lo:52,hi:62,sLo:50,sHi:69},{lo:42,hi:52,sLo:30,sHi:49},{lo:32,hi:42,sLo:0,sHi:29}];
+    if(p<32)return 0;
+    for(const b of bands){if(p>=b.lo&&p<b.hi){const pos=Math.min(1,(p-b.lo)/(b.hi-b.lo));return Math.round(b.sLo+pos*(b.sHi-b.sLo));}}return 100;
+  }
+  const rPrimary=retainScore(rPct);
+  const retain=Math.max(0,Math.min(100,rPrimary+(rPct<rPct2?-3:0)));
+
+  // RECRUIT
+  const e2526=enrolled(S2526).length, e2425=enrolled(S2425).length;
+  const gPct=e2425?(e2526-e2425)/e2425*100:0;
+  function recruitPrimary(p){
+    const bands=[{lo:10,hi:200,sLo:90,sHi:100},{lo:5,hi:10,sLo:70,sHi:89},{lo:0,hi:5,sLo:50,sHi:69},{lo:-5,hi:0,sLo:25,sHi:49},{lo:-10,hi:-5,sLo:0,sHi:24}];
+    if(p<-10)return 0;
+    for(const b of bands){if(p>=b.lo&&p<b.hi){const pos=Math.min(1,(p-b.lo)/(b.hi-b.lo));return Math.round(b.sLo+pos*(b.sHi-b.sLo));}}return 100;
+  }
+  const conv2526=e2526+tryoutOnly(S2526).length?e2526/(e2526+tryoutOnly(S2526).length)*100:0;
+  const conv2425=e2425+tryoutOnly(S2425).length?e2425/(e2425+tryoutOnly(S2425).length)*100:0;
+  const recruit=Math.max(0,Math.min(100,recruitPrimary(gPct)+(conv2526<conv2425?-5:conv2526>conv2425?5:0)));
+
+  // DEVELOP
+  const advRows=adv.filter(r=>r.curr_season_name==='2025/26'&&r.prev_season_name==='2024/25'&&r.advancement_status!=null);
+  const advScore=advRows.length?100*advRows.reduce((s,r)=>s+(r.points||0),0)/(advRows.length*2):null;
+  const tW=trend.reduce((s,r)=>s+(r.prior_games||0),0);
+  const wAvg=tW?trend.reduce((s,r)=>s+(r.trend_delta||0)*(r.prior_games||0),0)/tW:null;
+  const wtPts=wAvg==null?null:wAvg>=5?30:wAvg>=2?22:wAvg>=-2?14:wAvg>=-5?7:2;
+  const wN=width.length, wPts=wN?20*width.reduce((s,r)=>s+(r.cohort_points||0),0)/(4*wN):null;
+  const develop=(advScore!=null&&wtPts!=null&&wPts!=null)?advScore*0.5+wtPts+wPts:null;
+
+  const composite=develop!=null?Math.round((retain*0.40+recruit*0.30+develop*0.30)*10)/10:null;
+  function bandFor(s){if(s>=80)return'Healthy';if(s>=60)return'Stable';if(s>=40)return'Watch';return'At Risk';}
+  function bandColor(s){if(s>=80)return'#4ADE80';if(s>=60)return'#5B9BD5';if(s>=40)return'#E67E22';return'#C0392B';}
+
+  return {
+    composite, retain:Math.round(retain*10)/10, recruit:Math.round(recruit*10)/10,
+    develop:develop!=null?Math.round(develop*10)/10:null,
+    band:composite!=null?bandFor(composite):null,
+    bandColor:composite!=null?bandColor(composite):null,
+    retentionPct:Math.round(rPct*10)/10, growthPct:Math.round(gPct*10)/10,
+    conversionPct:Math.round(conv2526*10)/10
+  };
+}
+
 // ── RENDER HERO ───────────────────────────────────────────────
-function renderHero(gov, comp) {
+function renderHero(gov, comp, ch) {
   let parts = [];
   if (gov.overdueItems.length > 0) {
     const n = gov.overdueItems.length;
@@ -584,9 +648,12 @@ function renderHero(gov, comp) {
       parts.push(`The competitive program is <strong>stable vs last season</strong> with a ${comp.winPct}% win rate across ${comp.teamCount} teams.`);
     }
   }
-  const offlineModules = ['Financial','Operations'];
+  if (ch.composite != null) {
+    parts.push(`Club Health scores <strong>${ch.composite}/100 (${ch.band})</strong> — retention at ${ch.retentionPct}%, enrollment ${ch.growthPct>=0?'+':''}${ch.growthPct}% vs prior season.`);
+  }
+  const offlineModules = ['Financial'];
   if (offlineModules.length > 0) {
-    parts.push(`${offlineModules.join(' and ')} intelligence is not yet connected — Club Health Score will activate when all four domains are live.`);
+    parts.push(`${offlineModules.join(' and ')} intelligence is not yet connected — Executive Score will activate when all four domains are live.`);
   }
   document.getElementById('hero-summary').innerHTML = parts.join(' ');
 }
@@ -624,7 +691,7 @@ function compositeLabel(score) {
   return 'At Risk';
 }
 
-function renderHealthEngine(gov, comp, cfg, composite) {
+function renderHealthEngine(gov, comp, ch, cfg, composite) {
   // Populate score strip above section label
   const strip = document.getElementById('health-score-strip');
   if (composite.score != null) {
@@ -649,8 +716,8 @@ function renderHealthEngine(gov, comp, cfg, composite) {
   const domains = [
     { key: 'governance',  label: 'Governance',  color: '#2E6BAD', score: gov.score,  active: cfg.governance?.enabled },
     { key: 'competitive', label: 'Competitive', color: '#5B9BD5', score: comp.insufficient ? 0 : comp.score, active: cfg.competitive?.enabled && !comp.insufficient },
+    { key: 'club_health', label: 'Club Health', color: '#FEB95A', score: ch.composite, active: ch.composite != null },
     { key: 'financial',   label: 'Financial',   color: '#E6C65A', score: 0, active: cfg.financial?.enabled },
-    { key: 'operations',  label: 'Operations',  color: '#3ABFB0', score: 0, active: cfg.operations?.enabled },
   ];
 
   document.getElementById('health-domains').innerHTML = domains.map(d => `
@@ -668,7 +735,7 @@ function renderHealthEngine(gov, comp, cfg, composite) {
       <text x="44" y="40" font-family="Montserrat,sans-serif" font-size="9.5" font-weight="600" fill="#1e3a52" text-anchor="middle">PARTIAL</text>
       <text x="44" y="54" font-family="Montserrat,sans-serif" font-size="8.5" fill="#162a3a" text-anchor="middle">${composite.enabled.length} of 4</text>
     </svg>`;
-    document.getElementById('composite-note').innerHTML = `<span>Incomplete</span>Connect Financial &amp; Operations to activate the composite score`;
+    document.getElementById('composite-note').innerHTML = `<span>Incomplete</span>Connect Financial to activate the composite score`;
   } else {
     const fill2 = (composite.score / 100) * C2;
     const col = compositeColor(composite.score);
@@ -690,10 +757,12 @@ function renderHealthEngine(gov, comp, cfg, composite) {
 }
 
 // ── RENDER KPIs ───────────────────────────────────────────────
-function renderKPIs(gov, comp) {
+function renderKPIs(gov, comp, ch) {
   const govAtRisk = gov.overdueItems.length > 0;
   const compWinPct = comp.insufficient ? null : comp.winPct;
   const compDelta = comp.wrDelta;
+  const chBandColor = ch.bandColor || '#E67E22';
+  const chBand = ch.band || '—';
 
   document.getElementById('kpi-grid').innerHTML = `
     <div class="kpi-card ${govAtRisk ? 'at-risk' : ''}">
@@ -710,24 +779,24 @@ function renderKPIs(gov, comp) {
       <div class="kpi-delta ${compDelta == null ? 'neutral' : compDelta > 0 ? 'up' : 'down'}">${compDelta != null ? (compDelta > 0 ? '&#8593;' : '&#8595;') + ' ' + Math.abs(compDelta) + 'pts vs last season' : compWinPct != null ? comp.gamesPlayed + ' games played' : 'Insufficient data'}</div>
       <a class="kpi-cta" href="performance.html">View Performance &rarr;</a>
     </div>
+    <div class="kpi-card">
+      <div class="kpi-domain-label">Club Health</div>
+      <div class="kpi-num" style="color:${chBandColor}">${ch.composite != null ? ch.composite : '&mdash;'}</div>
+      <div class="kpi-desc">Composite score &middot; 2025/26</div>
+      <div class="kpi-delta" style="color:${chBandColor}">⬥ ${chBand} &middot; Retain ${ch.retain} · Recruit ${ch.recruit} · Develop ${ch.develop != null ? ch.develop : '—'}</div>
+      <a class="kpi-cta" href="club-health.html">View Club Health &rarr;</a>
+    </div>
     <div class="kpi-card offline">
       <div class="kpi-domain-label">Financial</div>
       <div class="kpi-num offline">&mdash;</div>
       <div class="kpi-desc">Budget vs actuals</div>
       <div class="kpi-delta offline">Financial module not yet connected</div>
       <a class="kpi-cta offline">Coming Soon</a>
-    </div>
-    <div class="kpi-card offline">
-      <div class="kpi-domain-label">Operations</div>
-      <div class="kpi-num offline">&mdash;</div>
-      <div class="kpi-desc">Registration status</div>
-      <div class="kpi-delta offline">Operations module not yet connected</div>
-      <a class="kpi-cta offline">Coming Soon</a>
     </div>`;
 }
 
 // ── RENDER INTEL CARDS ────────────────────────────────────────
-function renderIntel(gov, comp) {
+function renderIntel(gov, comp, ch) {
   const n = gov.overdueItems.length;
   const govSignal = n >= 3 ? ['action','Action Required'] : n >= 1 ? ['attention','Attention'] : ['all-clear','All Clear'];
   const govTitle = n >= 3 ? 'Board follow-through requires attention' : n >= 1 ? 'Action items need resolution' : 'Governance execution is on track';
@@ -753,6 +822,16 @@ function renderIntel(gov, comp) {
     compBody = `Program win rate is ${comp.winPct}% across ${comp.gamesPlayed} league games — tracking near last season's pace. Goal differential is ${comp.gdpg >= 0 ? '+' : ''}${comp.gdpg} per game. ${comp.girlsWR != null && comp.boysWR != null ? `Girls at ${comp.girlsWR}%, Boys at ${comp.boysWR}%.` : ''}`;
   }
 
+  // Club Health intel
+  const chSignal = ch.composite == null ? ['offline','No Data'] :
+    ch.composite >= 60 ? ['stable','Stable'] :
+    ch.composite >= 40 ? ['attention','Watch'] : ['action','At Risk'];
+  const chTitle = ch.composite == null ? 'Club Health data loading' :
+    ch.composite >= 60 ? 'Club Health is in stable range' :
+    ch.composite >= 40 ? 'Club Health requires board attention' : 'Club Health is at risk';
+  const chBody = ch.composite == null ? 'Club Health score is being computed.' :
+    `Composite ${ch.composite}/100 (${ch.band}). Retain ${ch.retain}/100 at ${ch.retentionPct}% player retention — ${(72-ch.retentionPct).toFixed(1)}pts below the 72% benchmark. Recruit ${ch.recruit}/100 with ${ch.growthPct>=0?'+':''}${ch.growthPct}% enrollment growth. Develop ${ch.develop!=null?ch.develop:'—'}/100. <strong><a href="club-health.html" style="color:#5B9BD5">View full Club Health dashboard →</a></strong>`;
+
   document.getElementById('intel-grid').innerHTML = `
     <div class="intel-card">
       <div class="intel-top"><span class="intel-domain-tag">Governance</span><span class="signal-pill ${govSignal[0]}">${govSignal[1]}</span></div>
@@ -764,20 +843,20 @@ function renderIntel(gov, comp) {
       <div class="intel-title">${compTitle}</div>
       <div class="intel-body">${compBody}</div>
     </div>
+    <div class="intel-card${ch.composite==null?' offline':''}">
+      <div class="intel-top"><span class="intel-domain-tag">Club Health</span><span class="signal-pill ${chSignal[0]}">${chSignal[1]}</span></div>
+      <div class="intel-title">${chTitle}</div>
+      <div class="intel-body">${chBody}</div>
+    </div>
     <div class="intel-card offline">
       <div class="intel-top"><span class="intel-domain-tag">Financial</span><span class="signal-pill offline">No Data</span></div>
       <div class="intel-title">Financial intelligence offline</div>
       <div class="intel-body">Connect the Financial module to surface budget health, registration revenue vs target, payroll sustainability, and forecast indicators here.</div>
-    </div>
-    <div class="intel-card offline">
-      <div class="intel-top"><span class="intel-domain-tag">Operations</span><span class="signal-pill offline">No Data</span></div>
-      <div class="intel-title">Operations intelligence offline</div>
-      <div class="intel-body">Connect the Operations module to surface registration status by tier, staffing alignment, field utilization, and program capacity here.</div>
     </div>`;
 }
 
 // ── RENDER RISKS ──────────────────────────────────────────────
-function renderRisks(gov, comp) {
+function renderRisks(gov, comp, ch) {
   const risks = [];
   const today = new Date(); today.setHours(0,0,0,0);
 
@@ -807,9 +886,20 @@ function renderRisks(gov, comp) {
     }
   }
 
+  // Club Health risks
+  if (ch.composite != null) {
+    if (ch.composite < 40) {
+      risks.push({ color:'red', title:`Club Health at risk (${ch.composite}/100)`, body:`Composite score is in the At Risk band. Retain ${ch.retain}/100 (${ch.retentionPct}% retention), Recruit ${ch.recruit}/100 (${ch.growthPct>=0?'+':''}${ch.growthPct}% growth), Develop ${ch.develop}/100. Board review of all three pillars recommended.` });
+    } else if (ch.composite < 60) {
+      risks.push({ color:'amber', title:`Club Health in Watch band (${ch.composite}/100)`, body:`Retention at ${ch.retentionPct}% — ${(72-ch.retentionPct).toFixed(1)}pts below the 72% benchmark. Enrollment ${ch.growthPct>=0?'+':''}${ch.growthPct}% year-over-year. View the Club Health dashboard for pillar-level detail.` });
+    }
+    if (ch.retentionPct < 55) {
+      risks.push({ color:'red', title:`Player retention critically low (${ch.retentionPct}%)`, body:`Retention is ${(72-ch.retentionPct).toFixed(1)}pts below the industry benchmark of 72%. This is the single largest driver of club health risk.` });
+    }
+  }
+
   // Static structural risks
   risks.push({ color:'amber', title:'Financial health unmonitored', body:'Budget and registration data are not connected. The board has no real-time financial visibility.' });
-  risks.push({ color:'amber', title:'Operations data not connected', body:'Registration status and staffing data are not yet in the system.' });
 
   // Sort red first
   risks.sort((a,b) => a.color === 'red' && b.color !== 'red' ? -1 : b.color === 'red' && a.color !== 'red' ? 1 : 0);
